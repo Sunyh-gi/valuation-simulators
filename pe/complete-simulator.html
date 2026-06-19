@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PE 完整模拟器 — 戈登增长 + ROE 联动</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #fff;
+  color: #1a1a1a;
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: #666; margin-bottom: 16px; }
+.formula-box {
+  background: #EEEDFE;
+  border-radius: 10px;
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #3C3489;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.formula-box em { font-style: normal; color: #A32D2D; font-weight: 600; }
+.formula-box .note { font-size: 12px; font-weight: 400; color: #666; display: block; margin-top: 4px; }
+
+.control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 700px) {
+  .control-grid { grid-template-columns: 1fr; }
+}
+.control-group label {
+  font-size: 13px; color: #666; display: block; margin-bottom: 4px;
+}
+.control-group label span { color: #1a1a1a; font-weight: 500; }
+.control-group input[type="range"] { width: 100%; margin: 2px 0; }
+.range-labels {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: #aaa; margin-top: 1px;
+}
+
+.status-card {
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.status-badge {
+  font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 20px;
+  white-space: nowrap;
+}
+.badge-creating { background: #E6F1FB; color: #185FA5; }
+.badge-destroying { background: #FCEBEB; color: #A32D2D; }
+.badge-neutral { background: #F1EFE8; color: #5F5E5A; }
+.status-desc { font-size: 13px; color: #666; flex: 1; min-width: 200px; }
+.status-desc strong { font-weight: 500; color: #1a1a1a; }
+
+.metric-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.metric-card {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 10px 18px;
+  text-align: center;
+  flex: 1;
+  min-width: 110px;
+}
+.metric-card .label { font-size: 11px; color: #999; margin-bottom: 2px; }
+.metric-card .value { font-size: 22px; font-weight: 500; color: #1a1a1a; line-height: 1.3; }
+.metric-card.highlight { background: #EEEDFE; border: 1px solid #CECBF6; }
+.metric-card.highlight .value { color: #3C3489; }
+
+.chart-container {
+  position: relative; width: 100%; height: 280px; margin-bottom: 8px;
+}
+
+.policy-note {
+  background: #FAEEDA;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #854F0B;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.footnote { font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<h1>PE 完整模拟器</h1>
+<p class="subtitle">将留存率 b 通过 g = b &times; ROE 与 PE 联动，直观展示 ROE &gt; r 和 ROE &lt; r 下 PE 截然不同的变化方向</p>
+
+<div class="formula-box">
+  PE = (1 &minus; b) / (r &minus; g)
+  &nbsp;&nbsp;其中&nbsp;&nbsp;
+  <em>g = b &times; ROE</em>
+  <span class="note">放大 b，如果 ROE &gt; r，PE 上升（增长创造价值）；如果 ROE &lt; r，PE 下降（分红才是对的）</span>
+</div>
+
+<div class="control-grid">
+  <div class="control-group">
+    <label>r（股权成本）: <span id="rVal">10.0%</span></label>
+    <input type="range" id="rSlider" min="6" max="16" value="10" step="0.5">
+    <div class="range-labels"><span>6%</span><span>16%</span></div>
+  </div>
+  <div class="control-group">
+    <label>ROE（净资产收益率）: <span id="roeVal">15%</span></label>
+    <input type="range" id="roeSlider" min="3" max="30" value="15" step="0.5">
+    <div class="range-labels"><span>3%</span><span>30%</span></div>
+  </div>
+  <div class="control-group">
+    <label>b（留存率）: <span id="bVal">50%</span></label>
+    <input type="range" id="bSlider" min="0" max="100" value="50" step="2">
+    <div class="range-labels"><span>全分红</span><span>全留存</span></div>
+  </div>
+</div>
+
+<div class="status-card" id="statusCard">
+  <span class="status-badge badge-creating" id="statusBadge">创造价值</span>
+  <span class="status-desc" id="statusDesc">当前 ROE（<strong id="roeInline">15.0%</strong>）&gt; r（<strong id="rInline">10.0%</strong>），留存利润再投资创造的价值超过资金成本。<strong>多留存推高 PE</strong></span>
+</div>
+
+<div class="metric-row">
+  <div class="metric-card">
+    <div class="label">b &times; ROE = g</div>
+    <div class="value" id="gVal">7.5%</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">r &minus; g（安全边际）</div>
+    <div class="value" id="spreadVal">2.5%</div>
+  </div>
+  <div class="metric-card highlight">
+    <div class="label">当前 PE</div>
+    <div class="value" id="peMain">20.0x</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">b=0% 全分红 PE</div>
+    <div class="value" id="peZero">10.0x</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">b=90% PE</div>
+    <div class="value" id="pe90">???</div>
+  </div>
+</div>
+
+<div class="chart-container">
+  <canvas id="mainChart" role="img" aria-label="PE 随留存率 b 的变化曲线">浏览器不支持 Canvas</canvas>
+</div>
+
+<div class="policy-note" id="policyNote">
+  当前建议：ROE 远超 r，应提高留存率以换取更高估值。
+</div>
+
+<p class="footnote">横轴为留存率 b（0% 到 100%）。曲线向上倾斜 = 多留存推高 PE（ROE &gt; r）；向下倾斜 = 多分红推高 PE（ROE &lt; r）；水平 = 留存分红无差异（ROE = r）。</p>
+
+<script>
+(function() {
+  var rS = document.getElementById('rSlider');
+  var roeS = document.getElementById('roeSlider');
+  var bS = document.getElementById('bSlider');
+  var chart;
+
+  function fmt(v) { return (v * 100).toFixed(1) + '%'; }
+
+  function update() {
+    var r = parseFloat(rS.value) / 100;
+    var roe = parseFloat(roeS.value) / 100;
+    var b = parseFloat(bS.value) / 100;
+    var g = b * roe;
+    var spread = r - g;
+    var pe = spread > 0.001 ? (1 - b) / spread : (spread > -0.001 ? null : (1 - b) / spread);
+
+    document.getElementById('rVal').textContent = fmt(r);
+    document.getElementById('roeVal').textContent = fmt(roe);
+    document.getElementById('bVal').textContent = (b * 100).toFixed(0) + '%';
+    document.getElementById('gVal').textContent = fmt(g);
+    document.getElementById('spreadVal').textContent = fmt(spread);
+    document.getElementById('rInline').textContent = fmt(r);
+    document.getElementById('roeInline').textContent = fmt(roe);
+
+    var peEl = document.getElementById('peMain');
+    if (pe !== null && isFinite(pe) && pe > 0 && pe < 500) {
+      peEl.textContent = pe.toFixed(1) + 'x';
+      peEl.style.color = '#3C3489';
+    } else if (pe !== null && pe >= 500) {
+      peEl.textContent = '发散';
+      peEl.style.color = '#A32D2D';
+    } else {
+      peEl.textContent = 'N/A';
+      peEl.style.color = '#999';
+    }
+
+    // PE at b=0%
+    var pe0 = r > 0.001 ? (1 / r) : 0;
+    document.getElementById('peZero').textContent = pe0 > 0 && pe0 < 500 ? pe0.toFixed(1) + 'x' : (pe0 >= 500 ? '发散' : 'N/A');
+
+    // PE at b=90%
+    var g90 = 0.9 * roe;
+    var sp90 = r - g90;
+    var pe90 = sp90 > 0.001 ? 0.1 / sp90 : null;
+    document.getElementById('pe90').textContent = pe90 !== null && pe90 < 500 ? pe90.toFixed(1) + 'x' : (pe90 >= 500 || pe90 === null ? '发散' : 'N/A');
+
+    // Status
+    var badge = document.getElementById('statusBadge');
+    var desc = document.getElementById('statusDesc');
+    var note = document.getElementById('policyNote');
+    if (roe > r + 0.002) {
+      badge.textContent = '创造价值';
+      badge.className = 'status-badge badge-creating';
+      desc.innerHTML = '当前 ROE（<strong>' + fmt(roe) + '</strong>）> r（<strong>' + fmt(r) + '</strong>），留存利润再投资创造的价值超过资金成本。<strong>多留存推高 PE</strong>';
+      note.textContent = 'ROE 远超 r，应提高留存率以换取更高估值。';
+    } else if (roe < r - 0.002) {
+      badge.textContent = '毁损价值';
+      badge.className = 'status-badge badge-destroying';
+      desc.innerHTML = '当前 ROE（<strong>' + fmt(roe) + '</strong>）< r（<strong>' + fmt(r) + '</strong>），再投资收益连资金成本都跑不赢。<strong>多分红推高 PE</strong>';
+      note.textContent = 'ROE 低于资金成本，建议提高分红率（降低 b）来提升估值。';
+    } else {
+      badge.textContent = '中性';
+      badge.className = 'status-badge badge-neutral';
+      desc.innerHTML = '当前 ROE（<strong>' + fmt(roe) + '</strong>）≈ r（<strong>' + fmt(r) + '</strong>），留存与分红对 PE 无显著影响。';
+      note.textContent = 'ROE 与资金成本接近，留存或分红对估值影响不大。';
+    }
+
+    // Chart
+    var labels = [];
+    var peData = [];
+    for (var i = 0; i <= 50; i++) {
+      var bi = i / 50;
+      labels.push((bi * 100).toFixed(0) + '%');
+      var gi = bi * roe;
+      var sp = r - gi;
+      if (sp > 0.002) {
+        var pei = (1 - bi) / sp;
+        peData.push(pei > 80 ? 80 : Math.round(pei * 10) / 10);
+      } else {
+        peData.push(null);
+      }
+    }
+    if (!chart) {
+      var ctx = document.getElementById('mainChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'PE',
+            data: peData,
+            borderColor: '#185FA5',
+            backgroundColor: 'rgba(55, 138, 221, 0.08)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2.5
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.parsed.y >= 80 ? 'PE >= 80x（发散区）' : 'PE: ' + ctx.parsed.y + 'x';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: '留存率 b', font: { size: 11 } },
+              ticks: { font: { size: 9 }, maxTicksLimit: 11 }
+            },
+            y: {
+              title: { display: true, text: 'PE（上限 80x）', font: { size: 11 } },
+              beginAtZero: true, max: 85,
+              ticks: { font: { size: 9 } }
+            }
+          }
+        }
+      });
+    } else {
+      chart.data.datasets[0].data = peData;
+      chart.update();
+    }
+  }
+
+  rS.addEventListener('input', update);
+  roeS.addEventListener('input', update);
+  bS.addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>
