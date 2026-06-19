@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PEG 估值计算器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #fff; color: #1e293b; padding: 32px 24px; max-width: 800px; margin: 0 auto;
+}
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+h1 small { font-size: 12px; font-weight: 400; color: #94a3b8; }
+.subtitle { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+.formula-card {
+  background: linear-gradient(135deg, #E8EDF3 0%, #eef2f8 100%);
+  border: 1px solid #CDD6E4; border-radius: 14px; padding: 16px 24px;
+  text-align: center; font-size: 16px; font-weight: 600; color: #2C3E6B;
+  margin-bottom: 20px; line-height: 1.7;
+}
+.formula-card em { font-style: normal; color: #e11d48; font-weight: 700; }
+.formula-card .sep { color: #A0B0C8; margin: 0 4px; }
+
+.control-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+  padding: 20px 24px;
+}
+@media (max-width: 600px) { .control-grid { grid-template-columns: 1fr; } }
+.control-group label {
+  font-size: 13px; color: #64748b; display: block; margin-bottom: 6px; font-weight: 500;
+}
+.control-group label span { color: #1e293b; font-weight: 600; }
+.control-group input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 4px;
+  border-radius: 2px; background: #e2e8f0; outline: none; margin: 6px 0;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+  background: #2C3E6B; cursor: pointer; border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(44,62,107,0.3); transition: transform 0.15s;
+}
+.control-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%; background: #2C3E6B;
+  cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(44,62,107,0.3);
+}
+.range-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+
+.peg-hero {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+  padding: 20px; margin-bottom: 16px; text-align: center;
+}
+.peg-hero .label { font-size: 12px; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 6px; }
+.peg-hero .value { font-size: 56px; font-weight: 700; line-height: 1.1; margin-bottom: 6px; transition: color 0.2s; }
+.peg-hero .desc { font-size: 14px; font-weight: 500; }
+
+.status-bar {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 14px 20px; margin-bottom: 16px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+}
+.status-badge { font-size: 13px; font-weight: 600; padding: 5px 14px; border-radius: 20px; white-space: nowrap; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-red { background: #fce4ec; color: #c62828; }
+.status-desc { font-size: 13px; color: #64748b; flex: 1; }
+
+.metric-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.metric-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 12px 16px; text-align: center; flex: 1; min-width: 100px;
+}
+.metric-card .label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; font-weight: 500; letter-spacing: 0.3px; }
+.metric-card .value { font-size: 22px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+
+.benchmark-box {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 16px 20px; margin-bottom: 14px;
+}
+.benchmark-box h3 { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 10px; }
+.benchmark-item {
+  display: flex; align-items: center; gap: 10px; padding: 6px 0;
+  font-size: 13px; color: #64748b; border-bottom: 1px solid #f1f5f9;
+}
+.benchmark-item:last-child { border-bottom: none; }
+.benchmark-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.benchmark-item .name { flex: 1; }
+.benchmark-item .val { font-weight: 600; color: #1e293b; text-align: right; min-width: 40px; }
+
+.policy-note {
+  background: linear-gradient(135deg, #fefce8 0%, #fef9e7 100%);
+  border: 1px solid #fde68a; border-radius: 12px;
+  padding: 12px 18px; font-size: 13px; color: #92400e; margin-bottom: 14px; line-height: 1.5;
+}
+
+.footnote { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<h1>PEG 估值计算器</h1>
+<p class="subtitle">将 PE 与增长预期结合，判断估值是否合理</p>
+
+<div class="formula-card">
+  PEG = PE <span class="sep">/</span> EPS 增长率（%）
+  &nbsp;&nbsp;↔&nbsp;&nbsp;
+  合理价：PEG &lt; 1.0
+</div>
+
+<div class="control-grid">
+  <div class="control-group">
+    <label>PE（市盈率） <span id="peVal">20x</span></label>
+    <input type="range" id="peSlider" min="5" max="60" value="20" step="1">
+    <div class="range-labels"><span>5x</span><span>60x</span></div>
+  </div>
+  <div class="control-group">
+    <label>EPS 增长率（%） <span id="gVal">20%</span></label>
+    <input type="range" id="gSlider" min="2" max="60" value="20" step="1">
+    <div class="range-labels"><span>2%</span><span>60%</span></div>
+  </div>
+</div>
+
+<div class="peg-hero">
+  <div class="label">PEG 比率</div>
+  <div class="value" id="pegDisplay">1.00</div>
+  <div class="desc" id="pegStatus">合理估值 — PE 与增长率匹配</div>
+</div>
+
+<div class="status-bar">
+  <span class="status-badge badge-green" id="statusBadge">低估</span>
+  <span class="status-desc" id="statusDesc">PEG &lt; 1.0，市场对增长的定价偏低，具备安全边际。</span>
+</div>
+
+<div class="metric-row">
+  <div class="metric-card">
+    <div class="label">每股利润</div>
+    <div class="value" id="epsVal">5.00</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">对应股价</div>
+    <div class="value" id="priceVal">100.0</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">合理 PE（PEG=1）</div>
+    <div class="value" id="fairPEText">20.0x</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">合理价（PEG=1）</div>
+    <div class="value" id="fairPrice">100.0</div>
+  </div>
+</div>
+
+<div class="benchmark-box">
+  <h3>对标参考</h3>
+  <div class="benchmark-item">
+    <span class="benchmark-dot" style="background:#15803d;"></span>
+    <span class="name">深度低估（PEG &lt; 0.5）</span>
+    <span class="val" id="ref0p5">—</span>
+  </div>
+  <div class="benchmark-item">
+    <span class="benchmark-dot" style="background:#65a30d;"></span>
+    <span class="name">低估（PEG 0.5-0.8）</span>
+    <span class="val" id="ref0p8">—</span>
+  </div>
+  <div class="benchmark-item">
+    <span class="benchmark-dot" style="background:#2C3E6B;"></span>
+    <span class="name">合理（PEG 0.8-1.2）</span>
+    <span class="val" id="ref1p2">—</span>
+  </div>
+  <div class="benchmark-item" style="color:#999;">
+    <span class="benchmark-dot" style="background:#999;"></span>
+    <span class="name">当前 PEG</span>
+    <span class="val" id="refCurrent" style="font-weight:700;">1.00</span>
+  </div>
+</div>
+
+<div class="policy-note" id="policyNote">
+  当前 PEG 处于低估区间，市场对增长的定价偏低，具备安全边际。但仍需验证增长的质量和可持续性。
+</div>
+
+<p class="footnote">PEG = PE / EPS增长率。PEG &lt; 1.0 通常被视为低估。<br>注意：PEG 对增长率假设极度敏感，用未来 3-5 年 CAGR 比单一财年更可靠。低增长公司（g &lt; 5%）PEG 参考意义有限。</p>
+
+<script>
+(function() {
+  var peS = document.getElementById('peSlider');
+  var gS = document.getElementById('gSlider');
+
+  function update() {
+    var pe = parseFloat(peS.value);
+    var gPct = parseFloat(gS.value);
+    var gDec = gPct / 100;
+    var peg = gDec > 0.001 ? (pe / (gPct)) : 999;
+
+    document.getElementById('peVal').textContent = pe + 'x';
+    document.getElementById('gVal').textContent = gPct + '%';
+
+    // EPS假设为5元，股价=PE*5
+    var eps = 5;
+    var price = pe * eps;
+    document.getElementById('epsVal').textContent = eps.toFixed(2);
+    document.getElementById('priceVal').textContent = price.toFixed(1);
+
+    // 合理PE=增长率（PEG=1时）
+    var fairPE = gPct;
+    document.getElementById('fairPEText').textContent = fairPE.toFixed(1) + 'x';
+    document.getElementById('fairPrice').textContent = (fairPE * eps).toFixed(1);
+
+    // PEG显示
+    var disp = document.getElementById('pegDisplay');
+    var status = document.getElementById('pegStatus');
+    var badge = document.getElementById('statusBadge');
+    var desc = document.getElementById('statusDesc');
+    var note = document.getElementById('policyNote');
+
+    if (peg < 0.5) {
+      disp.textContent = peg.toFixed(2);
+      disp.style.color = '#15803d';
+      status.textContent = '深度低估 — 极具吸引力';
+      badge.textContent = '深度低估'; badge.className = 'status-badge badge-green';
+      desc.textContent = 'PEG < 0.5，市场严重低估增长前景。需排查是否存在隐藏风险。';
+      note.textContent = 'PEG 低于 0.5，处于深度低估区间。通常说明市场对该公司的增长前景存在严重质疑，或者你的增长假设远高于市场预期。建议交叉验证增长预测的合理性。';
+    } else if (peg < 0.8) {
+      disp.textContent = peg.toFixed(2);
+      disp.style.color = '#65a30d';
+      status.textContent = '被低估 — 安全边际充足';
+      badge.textContent = '低估'; badge.className = 'status-badge badge-green';
+      desc.textContent = 'PEG < 0.8，市场对增长的定价偏低，具备安全边际。';
+      note.textContent = 'PEG 处于低估区间，市场对增长的定价偏低。如果增长预测可靠，这是一个潜在的投资机会。建议检查增长的质量（有机 vs 并购）和可持续性。';
+    } else if (peg < 1.2) {
+      disp.textContent = peg.toFixed(2);
+      disp.style.color = '#2C3E6B';
+      status.textContent = '合理估值 — PE 与增长率匹配';
+      badge.textContent = '合理'; badge.className = 'status-badge';
+      badge.style.background = '#e2e8f0'; badge.style.color = '#475569';
+      desc.textContent = 'PEG 在 0.8-1.2 之间，估值与增长基本匹配。';
+      note.textContent = 'PEG 处于合理区间，市场对增长的定价基本准确。此区间内需要更细致的基本面分析来做出判断，单纯靠 PEG 不足以决策。';
+    } else if (peg < 2.0) {
+      disp.textContent = peg.toFixed(2);
+      disp.style.color = '#d97706';
+      status.textContent = '偏高估 — 增长溢价较高';
+      badge.textContent = '偏高估'; badge.className = 'status-badge badge-amber';
+      desc.textContent = 'PEG 在 1.2-2.0 之间，市场为增长支付了溢价。';
+      note.textContent = 'PEG 偏高，市场为增长支付了显著溢价。可能合理（如果增长质量极好、护城河深厚），也可能是过度乐观。需要验证增长假设是否过于激进。';
+    } else {
+      disp.textContent = peg.toFixed(2);
+      disp.style.color = '#dc2626';
+      status.textContent = '高估 — 增长远不足以支撑估值';
+      badge.textContent = '高估'; badge.className = 'status-badge badge-red';
+      desc.textContent = 'PEG > 2.0，市场为增长支付了过高溢价。';
+      note.textContent = 'PEG 超过 2.0，估值对增长的依赖程度极高。即使增长预期准确，回报空间也有限。需要极强的理由（技术垄断、平台效应等）才能支撑当前估值。';
+    }
+
+    // 参考区间
+    document.getElementById('ref0p5').textContent = (gPct * 0.5).toFixed(1) + 'x PE';
+    document.getElementById('ref0p8').textContent = (gPct * 0.8).toFixed(1) + 'x PE';
+    document.getElementById('ref1p2').textContent = (gPct * 1.2).toFixed(1) + 'x PE';
+    document.getElementById('refCurrent').textContent = peg.toFixed(2);
+  }
+
+  peS.addEventListener('input', update);
+  gS.addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>
