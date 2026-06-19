@@ -271,20 +271,14 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
     // Update chart
     var d = buildData(r, roe);
     var m = buildMarker(r, roe, b);
-    if (chart) {
-      chart.data.labels = d.labels;
-      chart.data.datasets[0].data = d.data;
-      chart.data.datasets[1].data = m;
-      chart.update();
-    } else {
-      var ctx = document.getElementById('mainChart').getContext('2d');
-      chart = new Chart(ctx, {
+    if (!chart) {
+      chart = new Chart(document.getElementById('mainChart'), {
         type: 'line',
         data: {
-          labels: d.labels,
+          labels: d.labels.slice(),
           datasets: [{
             label: 'PE',
-            data: d.data,
+            data: d.data.slice(),
             borderColor: '#185FA5',
             backgroundColor: 'rgba(55, 138, 221, 0.08)',
             fill: true,
@@ -294,7 +288,7 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
             pointHitRadius: 10
           }, {
             label: 'b',
-            data: m,
+            data: m.slice(),
             borderColor: '#A32D2D',
             backgroundColor: '#A32D2D',
             pointRadius: 6,
@@ -302,14 +296,13 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointHoverRadius: 8,
-            showLine: false,
-            pointHitRadius: 10
+            showLine: false
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          animation: { duration: 200 },
+          animation: false,
           plugins: {
             legend: { display: false },
             tooltip: {
@@ -326,6 +319,14 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
           }
         }
       });
+    } else {
+      chart.data.datasets[0].data.length = 0;
+      Array.prototype.push.apply(chart.data.datasets[0].data, d.data);
+      chart.data.datasets[1].data.length = 0;
+      Array.prototype.push.apply(chart.data.datasets[1].data, m);
+      chart.data.labels.length = 0;
+      Array.prototype.push.apply(chart.data.labels, d.labels);
+      chart.update('none');
     }
   }
 
