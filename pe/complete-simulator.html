@@ -260,12 +260,18 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
       }
     }
     var ctx = document.getElementById('mainChart').getContext('2d');
+    // Build a marker dataset: a single visible dot at current b position
+    var markerData = new Array(51).fill(null);
+    var bIdx = Math.round(b * 50);
+    if (bIdx >= 0 && bIdx < peData.length && peData[bIdx] !== null) {
+      markerData[bIdx] = peData[bIdx];
+    }
     chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels,
         datasets: [{
-          label: 'PE',
+          label: 'PE 曲线',
           data: peData,
           borderColor: '#185FA5',
           backgroundColor: 'rgba(55, 138, 221, 0.08)',
@@ -273,6 +279,17 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
           tension: 0.3,
           pointRadius: 0,
           borderWidth: 2.5
+        }, {
+          label: '当前 b',
+          data: markerData,
+          borderColor: '#A32D2D',
+          backgroundColor: '#A32D2D',
+          pointRadius: 6,
+          pointBackgroundColor: '#A32D2D',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 8,
+          showLine: false
         }]
       },
       options: {
