@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PE 敏感性模拟器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #fff; color: #1e293b; padding: 32px; max-width: 800px; margin: 0 auto;
+}
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+.formula-card {
+  background: linear-gradient(135deg, #E8EDF3 0%, #eef2f8 100%);
+  border: 1px solid #CDD6E4; border-radius: 12px; padding: 12px 16px;
+  text-align: center; font-size: 14px; font-weight: 600; color: #2C3E6B;
+  margin-bottom: 14px; line-height: 1.6;
+}
+.formula-card em { font-style: normal; color: #e11d48; font-weight: 700; }
+.formula-card .sep { color: #A0B0C8; margin: 0 4px; }
+
+.control-grid-3 {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 14px 18px;
+}
+@media (max-width: 600px) { .control-grid-3 { grid-template-columns: 1fr; } }
+.control-group label {
+  font-size: 12px; color: #64748b; display: block; margin-bottom: 3px; font-weight: 500;
+}
+.control-group label span { color: #1e293b; font-weight: 600; }
+.control-group input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 3px;
+  border-radius: 2px; background: #e2e8f0; outline: none; margin: 3px 0;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #2C3E6B; cursor: pointer; border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(44,62,107,0.3); transition: transform 0.15s;
+}
+.control-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%; background: #2C3E6B;
+  cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(44,62,107,0.3);
+}
+.range-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+
+.pe-hero {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 14px; margin-bottom: 14px; text-align: center;
+}
+.pe-hero .label { font-size: 11px; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 2px; }
+.pe-hero .value { font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; transition: color 0.2s; }
+.pe-hero .desc { font-size: 13px; font-weight: 500; }
+
+.status-bar {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 8px 14px; margin-bottom: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-red { background: #fce4ec; color: #c62828; }
+.badge-blue { background: #e6f1fb; color: #185fa5; }
+.status-desc { font-size: 12px; color: #64748b; flex: 1; }
+
+.metric-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.metric-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 8px 10px; text-align: center; flex: 1; min-width: 80px;
+}
+.metric-card .label { font-size: 10px; color: #94a3b8; margin-bottom: 2px; font-weight: 500; letter-spacing: 0.3px; }
+.metric-card .value { font-size: 20px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+
+.chart-box {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 10px 14px; margin-bottom: 10px;
+}
+.chart-box canvas { display: block; width: 100%; height: 160px; }
+
+.footnote { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h1>PE 敏感性模拟器</h1>
+<p class="subtitle">基于戈登增长模型，观察 PE 对 r、g、留存率的敏感度</p>
+
+<div class="formula-card">
+  PE = (1 <span class="sep">−</span> b) <span class="sep">/</span> (r <span class="sep">−</span> g)
+</div>
+
+<div class="control-grid-3">
+  <div class="control-group">
+    <label>股权成本 r <span id="rVal">10.0%</span></label>
+    <input type="range" id="rSlider" min="6" max="16" value="10" step="0.5">
+    <div class="range-labels"><span>6%</span><span>16%</span></div>
+  </div>
+  <div class="control-group">
+    <label>永续增长率 g <span id="gVal">3.0%</span></label>
+    <input type="range" id="gSlider" min="0" max="8" value="3" step="0.5">
+    <div class="range-labels"><span>0%</span><span>8%</span></div>
+  </div>
+  <div class="control-group">
+    <label>留存率 b <span id="bVal">60%</span></label>
+    <input type="range" id="bSlider" min="0" max="100" value="60" step="5">
+    <div class="range-labels"><span>0%（全分红）</span><span>100%（全留存）</span></div>
+  </div>
+</div>
+
+<div class="pe-hero">
+  <div class="label">理论 PE</div>
+  <div class="value" id="peResult">16.7x</div>
+  <div class="desc" id="peStatus">合理估值区间</div>
+</div>
+
+<div class="status-bar">
+  <span class="status-badge badge-blue" id="statusBadge">合理</span>
+  <span class="status-desc" id="statusDesc">r − g = 7.0%，安全边际充足，PE 处于合理范围。</span>
+</div>
+
+<div class="metric-row">
+  <div class="metric-card">
+    <div class="label">分红率</div>
+    <div class="value" id="payResult">40%</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">安全边际 r − g</div>
+    <div class="value" id="spreadResult">7.0%</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">隐含 ROE</div>
+    <div class="value" id="roeResult">—</div>
+  </div>
+</div>
+
+<div class="chart-box">
+  <canvas id="peChart" height="160"></canvas>
+</div>
+
+<p class="footnote">当 g 接近 r 时，PE 发散（趋近无穷）。右侧折线下降表示 spread ≤ 0.2%，模型失效。ROE = r / (1 − b) 为模型隐含的净资产收益率。</p>
+
+<script>
+(function() {
+  var rS = document.getElementById('rSlider');
+  var gS = document.getElementById('gSlider');
+  var bS = document.getElementById('bSlider');
+  var canvas = document.getElementById('peChart');
+  var ctx = canvas.getContext('2d');
+
+  function getDPI() {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    return { w: rect.width, h: rect.height };
+  }
+
+  function update() {
+    var r = parseFloat(rS.value) / 100;
+    var g = parseFloat(gS.value) / 100;
+    var b = parseFloat(bS.value) / 100;
+    var spread = r - g;
+    var pe = spread > 0 ? (1 - b) / spread : null;
+
+    document.getElementById('rVal').textContent = (r * 100).toFixed(1) + '%';
+    document.getElementById('gVal').textContent = (g * 100).toFixed(1) + '%';
+    document.getElementById('bVal').textContent = (b * 100).toFixed(0) + '%';
+    document.getElementById('payResult').textContent = ((1 - b) * 100).toFixed(0) + '%';
+    document.getElementById('spreadResult').textContent = (spread * 100).toFixed(1) + '%';
+
+    // Implied ROE: from g = b * ROE → ROE = g / b, or from PE inverse: ROE = r / (1 - b)
+    var roe = (1 - b) > 0.001 ? r / (1 - b) : 0;
+    document.getElementById('roeResult').textContent = roe > 0 ? (roe * 100).toFixed(1) + '%' : 'N/A';
+
+    var peEl = document.getElementById('peResult');
+    var statusEl = document.getElementById('peStatus');
+    var badge = document.getElementById('statusBadge');
+    var desc = document.getElementById('statusDesc');
+
+    if (pe === null || !isFinite(pe) || spread <= 0.001) {
+      peEl.textContent = '发散';
+      peEl.style.color = '#c62828';
+      statusEl.textContent = '模型失效 — g 接近 r，PE 趋近无穷';
+      badge.textContent = '失效'; badge.className = 'status-badge badge-red';
+      desc.textContent = 'g 已接近或超过 r，戈登增长模型不再适用。实际中此类公司通常无稳定分红或处于高增长阶段。';
+    } else if (pe >= 50) {
+      peEl.textContent = '>50x';
+      peEl.style.color = '#d97706';
+      statusEl.textContent = '极高估值 — g 非常接近 r';
+      badge.textContent = '极高'; badge.className = 'status-badge badge-amber';
+      desc.textContent = 'PE > 50x，增长预期极高。需验证 g 假设是否可持续，以及股权成本 r 是否被低估。';
+    } else if (pe >= 25) {
+      peEl.textContent = pe.toFixed(1) + 'x';
+      peEl.style.color = '#d97706';
+      statusEl.textContent = '偏高估 — 增长溢价较高';
+      badge.textContent = '偏高'; badge.className = 'status-badge badge-amber';
+      desc.textContent = 'PE 在 25-50x 之间，市场为增长支付了显著溢价。需确认增长率假设的质量和可持续性。';
+    } else if (pe >= 10) {
+      peEl.textContent = pe.toFixed(1) + 'x';
+      peEl.style.color = '#185fa5';
+      statusEl.textContent = '合理估值区间';
+      badge.textContent = '合理'; badge.className = 'status-badge badge-blue';
+      desc.textContent = 'PE 在 10-25x 之间，处于多数成熟行业的典型估值区间。r − g = ' + (spread * 100).toFixed(1) + '%，安全边际充足。';
+    } else {
+      peEl.textContent = pe.toFixed(1) + 'x';
+      peEl.style.color = '#15803d';
+      statusEl.textContent = '低估 — 安全边际充足';
+      badge.textContent = '低估'; badge.className = 'status-badge badge-green';
+      desc.textContent = 'PE < 10x，市场定价保守。结合 ROE 判断：ROE 高则可能是价值股机会，ROE 低则需警惕价值陷阱。';
+    }
+
+    drawChart(r, b);
+  }
+
+  function drawChart(r, b) {
+    var dim = getDPI();
+    var w = dim.w, h = dim.h;
+    var pad = { top: 14, bottom: 22, left: 38, right: 16 };
+    var plotW = w - pad.left - pad.right;
+    var plotH = h - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#fafbfc';
+    ctx.fillRect(0, 0, w, h);
+
+    // Generate data: PE vs g for g = 0% to 8% (17 points)
+    var labels = [], data = [];
+    for (var i = 0; i <= 16; i++) {
+      var g = i * 0.5 / 100;
+      labels.push((g * 100).toFixed(1) + '%');
+      var spread = r - g;
+      if (spread > 0.002) {
+        var pe = (1 - b) / spread;
+        data.push(pe > 50 ? null : Math.round(pe * 10) / 10);
+      } else {
+        data.push(null);
+      }
+    }
+
+    // Chart dimensions
+    var barWidth = plotW / labels.length * 0.65;
+    var maxPE = 50;
+
+    function xPos(idx) { return pad.left + (idx + 0.5) * plotW / labels.length; }
+    function yPos(v) { return pad.top + plotH - (v / maxPE) * plotH; }
+
+    // Draw bars
+    for (var i = 0; i < labels.length; i++) {
+      var x = xPos(i) - barWidth / 2;
+      if (data[i] !== null && data[i] > 0) {
+        var bh = (data[i] / maxPE) * plotH;
+        var grad = ctx.createLinearGradient(0, yPos(data[i]), 0, pad.top + plotH);
+        grad.addColorStop(0, 'rgba(60, 52, 137, 0.7)');
+        grad.addColorStop(1, 'rgba(60, 52, 137, 0.2)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(x, yPos(data[i]), barWidth, bh, [2, 2, 0, 0]);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(60, 52, 137, 0.5)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+
+    // X-axis labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '8px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    for (var i = 0; i < labels.length; i += 2) {
+      ctx.fillText(labels[i], xPos(i), pad.top + plotH + 14);
+    }
+
+    // Y-axis
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 0.5;
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+    for (var v = 0; v <= 50; v += 10) {
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yPos(v));
+      ctx.lineTo(pad.left + plotW, yPos(v));
+      ctx.stroke();
+      ctx.textAlign = 'right';
+      ctx.fillText(v + 'x', pad.left - 4, yPos(v) + 3);
+    }
+
+    // Axis labels
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('g →', pad.left + plotW - 20, pad.top + plotH + 20);
+
+    // Current g marker
+    var curG = parseFloat(gS.value) / 100;
+    var curIdx = Math.round(curG / 0.005);
+    var curPE = data[curIdx];
+    if (curPE !== null && curPE > 0) {
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.arc(xPos(curIdx), yPos(curPE), 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#854F0B';
+      ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      var peText = (1 - b) / (r - curG);
+      var lbl = peText > 50 ? '>50x' : peText.toFixed(1) + 'x';
+      ctx.fillText('当前 PE=' + lbl, xPos(curIdx), yPos(curPE) - 10);
+    }
+  }
+
+  rS.addEventListener('input', update);
+  gS.addEventListener('input', update);
+  bS.addEventListener('input', update);
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+</body>
+</html>
