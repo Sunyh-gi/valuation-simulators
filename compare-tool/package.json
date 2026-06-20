@@ -1,0 +1,12 @@
+{
+  "name": "valuation-peer-compare",
+  "version": "1.0.0",
+  "description": "实时估值对比工具 - 搜索标的公司，与同行业龙头对比PE/PB/PS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

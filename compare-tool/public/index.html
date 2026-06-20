@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>估值对比工具</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f8fafc;color:#1e293b;padding:24px;max-width:1200px;margin:0 auto}
+h1{font-size:24px;font-weight:600;margin-bottom:4px}
+.sub{font-size:13px;color:#64748b;margin-bottom:20px}
+
+/* Search */
+.search-box{display:flex;gap:10px;margin-bottom:20px}
+.search-box input{flex:1;padding:10px 16px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;max-width:400px}
+.search-box input:focus{border-color:#2C3E6B}
+.search-box button{padding:10px 20px;background:#2C3E6B;color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer}
+.search-box button:hover{background:#1d2d4e}
+.search-box button:disabled{opacity:.5;cursor:not-allowed}
+.search-hint{font-size:12px;color:#94a3b8;margin-top:-12px;margin-bottom:16px}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:6px 14px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:13px;cursor:pointer;color:#64748b;transition:all .15s}
+.tab:hover{border-color:#2C3E6B;color:#2C3E6B}
+.tab.active{background:#2C3E6B;color:#fff;border-color:#2C3E6B}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:#64748b;font-size:14px}
+
+/* Table */
+.table-wrap{overflow-x:auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f1f5f9;padding:8px 10px;text-align:center;font-weight:600;color:#475569;white-space:nowrap;border-bottom:2px solid #e2e8f0}
+td{padding:7px 8px;text-align:center;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+td.name{text-align:left;font-weight:600;color:#1e293b}
+tr:hover td{background:#f8fafc}
+
+/* Valuation colors */
+.val-high{color:#c62828;font-weight:600}
+.val-mid{color:#d97706;font-weight:600}
+.val-low{color:#15803d;font-weight:600}
+.val-na{color:#94a3b8}
+
+/* Percentile bar */
+.pct-bar{display:inline-block;width:50px;height:6px;background:#e2e8f0;border-radius:3px;vertical-align:middle;margin-right:4px;position:relative}
+.pct-fill{height:100%;border-radius:3px;transition:width .3s}
+.pct-fill.g{background:#15803d}
+.pct-fill.y{background:#d97706}
+.pct-fill.r{background:#c62828}
+.pct-fill.b{background:#185fa5}
+
+/* Charts */
+.chart-section{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:16px}
+.chart-section h3{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:10px}
+.chart-row{display:flex;gap:12px;flex-wrap:wrap}
+.chart-box{flex:1;min-width:280px}
+.chart-box canvas{width:100%;height:200px}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:11px;color:#64748b}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+.fn{font-size:11px;color:#94a3b8;line-height:1.5}
+</style>
+</head>
+<body>
+
+<h1>估值对比工具</h1>
+<p class="sub">搜索标的公司，与同行业龙头对比 5 年 PE / PB / PS 数据</p>
+
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="输入公司名称或代码，如 茅台、腾讯、阿里巴巴..." />
+  <button id="searchBtn" onclick="doSearch()">搜索</button>
+</div>
+<div class="search-hint" id="searchHint">支持 A 股、港股、美股上市公司</div>
+
+<div class="tabs" id="tabContainer"></div>
+
+<div id="content">
+  <p style="text-align:center;padding:60px 0;color:#94a3b8;font-size:14px">选择一个行业，或搜索标的公司开始对比</p>
+</div>
+
+<div class="fn">数据来源：腾讯自选股。PE/PB/PS 基于年末收盘价和年报财务数据计算。估值高低基于历史百分位判断，仅供参考，不构成投资建议。</div>
+
+<script>
+const API = window.location.origin;
+
+// ─── 加载行业分组 ───
+let groups = [];
+fetch(API + '/api/groups')
+  .then(r => r.json())
+  .then(list => {
+    groups = list;
+    renderTabs();
+  });
+
+function renderTabs() {
+  const c = document.getElementById('tabContainer');
+  c.innerHTML = '<div class="tab active" onclick="loadGroup(this,\'\')">全部行业</div>';
+  groups.forEach(g => {
+    c.innerHTML += '<div class="tab" onclick="loadGroup(this,\''+g.id+'\')">'+g.name+' ('+g.count+')</div>';
+  });
+}
+
+// ─── 搜索 ───
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  document.getElementById('searchBtn').disabled = true;
+  document.getElementById('content').innerHTML = '<div class="loading">搜索中...</div>';
+
+  fetch(API + '/api/search?q=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(data => {
+      if (data.results.length === 0) {
+        document.getElementById('content').innerHTML = '<div class="loading" style="color:#c62828">未找到匹配的公司，请检查名称或代码</div>';
+        return;
+      }
+      // 直接加载第一个匹配的行业
+      const groupId = data.results[0].group;
+      loadGroup(null, groupId);
+      document.getElementById('searchHint').textContent = '找到 ' + data.results.length + ' 条结果，已加载行业: ' + data.results[0].groupName;
+    })
+    .catch(() => {
+      document.getElementById('content').innerHTML = '<div class="loading" style="color:#c62828">搜索失败，请稍后重试</div>';
+    })
+    .finally(() => { document.getElementById('searchBtn').disabled = false; });
+}
+
+// 回车搜索
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doSearch();
+});
+
+// ─── 加载行业数据 ───
+function loadGroup(el, groupId) {
+  // 更新 tab 状态
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => { if(t.textContent.includes(groups.find(g=>g.id===groupId)?.name||'')) t.classList.add('active'); });
+  }
+
+  if (!groupId) {
+    document.getElementById('content').innerHTML = '<p style="text-align:center;padding:60px 0;color:#94a3b8;font-size:14px">选择一个行业开始对比</p>';
+    return;
+  }
+
+  document.getElementById('content').innerHTML = '<div class="loading">正在获取数据（约 15-30 秒）...</div>';
+
+  fetch(API + '/api/compare?group=' + groupId)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        document.getElementById('content').innerHTML = '<div class="loading" style="color:#c62828">'+data.error+'</div>';
+        return;
+      }
+      renderResult(data);
+    })
+    .catch(() => {
+      document.getElementById('content').innerHTML = '<div class="loading" style="color:#c62828">数据加载失败，请稍后重试</div>';
+    });
+}
+
+// ─── 渲染结果 ───
+function renderResult(data) {
+  const stocks = data.data;
+  let html = '<div style="font-size:13px;color:#1e293b;margin-bottom:10px"><b>'+data.group+'</b> — 共 ' + data.count + ' 家公司</div>';
+
+  // ─── 表格 ───
+  html += '<div class="table-wrap"><table><tr>' +
+    '<th>公司</th><th>年份</th>' +
+    '<th>PE</th><th>PE 5年均</th><th>PE分位</th>' +
+    '<th>PB</th><th>PB 5年均</th><th>PB分位</th>' +
+    '<th>PS</th><th>PS 5年均</th><th>PS分位</th>' +
+    '</tr>';
+
+  stocks.forEach(s => {
+    const years = s.years || [];
+    years.forEach((y, idx) => {
+      const isLast = idx === years.length - 1;
+      html += '<tr>' +
+        (idx === 0 ? '<td class="name" rowspan="' + years.length + '">' + s.name + '<br><span style="font-weight:400;font-size:10px;color:#94a3b8">' + s.code + '</span></td>' : '') +
+        '<td>' + y.year + (isLast ? ' ←' : '') + '</td>' +
+        '<td class="' + valClass(y.pe, s.avgPE) + '">' + (y.pe !== null ? y.pe.toFixed(1) + 'x' : '-') + '</td>' +
+        '<td>' + (s.avgPE !== null ? s.avgPE.toFixed(1) + 'x' : '-') + '</td>' +
+        '<td>' + pctBar(s.pePercentile) + '</td>' +
+        '<td class="' + valClass(y.pb, s.avgPB) + '">' + (y.pb !== null ? y.pb.toFixed(1) + 'x' : '-') + '</td>' +
+        '<td>' + (s.avgPB !== null ? s.avgPB.toFixed(1) + 'x' : '-') + '</td>' +
+        '<td>' + pctBar(s.pbPercentile) + '</td>' +
+        '<td class="' + valClass(y.ps, s.avgPS) + '">' + (y.ps !== null ? y.ps.toFixed(1) + 'x' : '-') + '</td>' +
+        '<td>' + (s.avgPS !== null ? s.avgPS.toFixed(1) + 'x' : '-') + '</td>' +
+        '<td>' + pctBar(s.psPercentile) + '</td>' +
+        '</tr>';
+    });
+  });
+
+  html += '</table></div>';
+
+  // ─── 图表 ───
+  html += '<div class="chart-section"><h3>5 年 PE 趋势对比</h3><div class="chart-row">' +
+    '<div class="chart-box"><canvas id="peChart" height="200"></canvas></div>' +
+    '<div class="chart-box"><canvas id="pbChart" height="200"></canvas></div>' +
+    '</div></div>';
+
+  html += '<div class="chart-section"><h3>最新估值雷达（PE / PB / PS 百分位）</h3>' +
+    '<div class="chart-box"><canvas id="radarChart" height="240"></canvas></div></div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // 绘制图表
+  drawPELine(stocks);
+  drawPBLine(stocks);
+  drawRadar(stocks);
+}
+
+function valClass(val, avg) {
+  if (val === null || avg === null) return 'val-na';
+  const ratio = val / avg;
+  if (ratio > 1.3) return 'val-high';
+  if (ratio > 1.1) return 'val-mid';
+  if (ratio < 0.7) return 'val-low';
+  if (ratio < 0.9) return 'val-mid';
+  return '';
+}
+
+function pctBar(pct) {
+  if (pct === null) return '<span class="val-na">N/A</span>';
+  const cls = pct < 30 ? 'g' : (pct < 70 ? 'y' : 'r');
+  return '<div class="pct-bar"><div class="pct-fill ' + cls + '" style="width:' + pct + '%"></div></div><span style="font-size:10px">' + pct + '%</span>';
+}
+
+// ─── 图表 ───
+const COLORS = ['#2C3E6B','#D85A30','#15803d','#d97706','#185fa5','#7C3AED','#0D9488','#DC2626'];
+
+function drawPELine(stocks) {
+  const c = document.getElementById('peChart');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr; c.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const pad = {top: 20, bottom: 24, left: 40, right: 16};
+  const pw = w - pad.left - pad.right, ph = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+
+  const years = [2021, 2022, 2023, 2024, 2025];
+  let maxPE = 0;
+  stocks.forEach(s => (s.years||[]).forEach(y => { if (y.pe && y.pe > maxPE) maxPE = y.pe; }));
+  maxPE = Math.ceil(maxPE / 10) * 10 + 10;
+
+  function x(idx) { return pad.left + (idx + 0.5) * pw / years.length; }
+  function y(v) { return pad.top + ph - (v / maxPE) * ph; }
+
+  // Grid
+  ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 0.5;
+  for (let v = 0; v <= maxPE; v += Math.max(10, Math.round(maxPE/5/5)*5)) {
+    ctx.beginPath(); ctx.moveTo(pad.left, y(v)); ctx.lineTo(pad.left+pw, y(v)); ctx.stroke();
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(v + 'x', pad.left - 4, y(v) + 4);
+  }
+
+  // X labels
+  ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  years.forEach((y, i) => ctx.fillText(y, x(i), pad.top + ph + 16));
+
+  // Lines
+  stocks.forEach((s, si) => {
+    if (si >= 8) return; // Max 8 lines
+    const pts = (s.years||[]).filter(y => y.pe !== null);
+    if (pts.length < 2) return;
+
+    ctx.strokeStyle = COLORS[si % COLORS.length]; ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      const px = x(years.indexOf(p.year));
+      if (i === 0) ctx.moveTo(px, y(p.pe));
+      else ctx.lineTo(px, y(p.pe));
+    });
+    ctx.stroke();
+
+    // Dots on last point
+    const last = pts[pts.length - 1];
+    ctx.fillStyle = COLORS[si % COLORS.length];
+    ctx.beginPath(); ctx.arc(x(years.indexOf(last.year)), y(last.pe), 4, 0, Math.PI * 2); ctx.fill();
+
+    // Label
+    ctx.fillStyle = COLORS[si % COLORS.length]; ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(s.name, x(years.indexOf(last.year)) + 6, y(last.pe) + 4);
+  });
+}
+
+function drawPBLine(stocks) {
+  const c = document.getElementById('pbChart');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr; c.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const pad = {top: 20, bottom: 24, left: 40, right: 16};
+  const pw = w - pad.left - pad.right, ph = h - pad.top - pad.bottom;
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+
+  const years = [2021, 2022, 2023, 2024, 2025];
+  let maxPB = 0;
+  stocks.forEach(s => (s.years||[]).forEach(y => { if (y.pb && y.pb > maxPB) maxPB = y.pb; }));
+  maxPB = Math.ceil(maxPB / 2) * 2 + 2;
+
+  function x(idx) { return pad.left + (idx + 0.5) * pw / years.length; }
+  function y(v) { return pad.top + ph - (v / maxPB) * ph; }
+
+  ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 0.5;
+  for (let v = 0; v <= maxPB; v += Math.max(1, Math.round(maxPB/5))) {
+    ctx.beginPath(); ctx.moveTo(pad.left, y(v)); ctx.lineTo(pad.left+pw, y(v)); ctx.stroke();
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(v<1?2:1) + 'x', pad.left - 4, y(v) + 4);
+  }
+
+  ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  years.forEach((y, i) => ctx.fillText(y, x(i), pad.top + ph + 16));
+
+  // PB=1参考线
+  ctx.strokeStyle = '#fecaca'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(pad.left, y(1)); ctx.lineTo(pad.left+pw, y(1)); ctx.stroke();
+  ctx.fillStyle = '#ef4444'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right';
+  ctx.fillText('PB=1', pad.left+pw, y(1)-4);
+  ctx.setLineDash([]);
+
+  stocks.forEach((s, si) => {
+    if (si >= 8) return;
+    const pts = (s.years||[]).filter(y => y.pb !== null);
+    if (pts.length < 2) return;
+
+    ctx.strokeStyle = COLORS[si % COLORS.length]; ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      const px = x(years.indexOf(p.year));
+      if (i === 0) ctx.moveTo(px, y(p.pb));
+      else ctx.lineTo(px, y(p.pb));
+    });
+    ctx.stroke();
+
+    const last = pts[pts.length - 1];
+    ctx.fillStyle = COLORS[si % COLORS.length];
+    ctx.beginPath(); ctx.arc(x(years.indexOf(last.year)), y(last.pb), 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = COLORS[si % COLORS.length]; ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(s.name, x(years.indexOf(last.year)) + 6, y(last.pb) + 4);
+  });
+  ctx.fillStyle = '#1e293b'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('5 年 PB 趋势对比', w/2, 14);
+}
+
+function drawRadar(stocks) {
+  const c = document.getElementById('radarChart');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr; c.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const cx = w / 2, cy = h / 2;
+  const r = Math.min(cx, cy) - 40;
+  const metrics = ['PE', 'PB', 'PS'];
+  const angles = [0, 120, 240].map(a => a * Math.PI / 180 - Math.PI/2);
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  for (let ring = 1; ring <= 4; ring++) {
+    const rr = r * ring / 4;
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    for (let i = 0; i <= 3; i++) {
+      const px = cx + rr * Math.cos(angles[i % 3]);
+      const py = cy + rr * Math.sin(angles[i % 3]);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath(); ctx.stroke();
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText((25*ring)+'%', cx + (rr+12) * Math.cos(angles[0]-0.1), cy + (rr+12) * Math.sin(angles[0]-0.1)+3);
+  }
+
+  // Axis labels
+  metrics.forEach((m, i) => {
+    ctx.fillStyle = '#475569'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(m, cx + (r+16) * Math.cos(angles[i]), cy + (r+16) * Math.sin(angles[i]) + 3);
+  });
+
+  // Data
+  stocks.forEach((s, si) => {
+    if (si >= 8) return;
+    const vals = [s.pePercentile, s.pbPercentile, s.psPercentile];
+    const hasData = vals.some(v => v !== null);
+    if (!hasData) return;
+
+    ctx.strokeStyle = COLORS[si % COLORS.length]; ctx.lineWidth = 2;
+    ctx.fillStyle = COLORS[si % COLORS.length] + '20';
+    ctx.beginPath();
+    vals.forEach((v, i) => {
+      const vv = (v !== null ? v : 0) / 100;
+      const px = cx + r * vv * Math.cos(angles[i]);
+      const py = cy + r * vv * Math.sin(angles[i]);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Legend
+    ctx.fillStyle = COLORS[si % COLORS.length]; ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(s.name + ' (PE' + (s.pePercentile!==null?s.pePercentile+'%':'N/A') + ')', w - 200, 20 + si * 18);
+  });
+
+  ctx.fillStyle = '#1e293b'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('百分位越低越低估（越靠近中心）', w/2, 14);
+}
+</script>
+</body>
+</html>
