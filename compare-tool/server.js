@@ -300,6 +300,7 @@ app.get('/api/compare', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`估值对比工具已启动: http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`估值对比工具已启动: http://${HOST}:${PORT}`);
 });
