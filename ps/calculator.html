@@ -5,98 +5,88 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PS 市销率模拟器</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: #fff; color: #1e293b; padding: 32px; max-width: 800px; margin: 0 auto;
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#fff;color:#1e293b;padding:32px;max-width:800px;margin:0 auto
 }
-h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
-.subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
-.formula-card {
-  background: linear-gradient(135deg, #E8EDF3 0%, #eef2f8 100%);
-  border: 1px solid #CDD6E4; border-radius: 12px; padding: 12px 16px;
-  text-align: center; font-size: 14px; font-weight: 600; color: #2C3E6B;
-  margin-bottom: 14px; line-height: 1.6;
+h1{font-size:22px;font-weight:600;margin-bottom:6px}
+.subtitle{font-size:13px;color:#64748b;margin-bottom:16px}
+.f-card{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:12px 16px;text-align:center;font-size:14px;font-weight:600;
+  color:#2C3E6B;margin-bottom:14px;line-height:1.6
 }
-.formula-card em { font-style: normal; color: #e11d48; font-weight: 700; }
-.formula-card .sep { color: #A0B0C8; margin: 0 4px; }
+.cg2{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 18px
+}
+.cg3{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:12px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 16px
+}
+@media(max-width:600px){.cg2,.cg3{grid-template-columns:1fr}}
+.cg label{
+  font-size:12px;color:#64748b;display:block;margin-bottom:3px;font-weight:500
+}
+.cg label span{color:#1e293b;font-weight:600}
+.cg input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
+  background:#e2e8f0;outline:none;margin:3px 0
+}
+.cg input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#2C3E6B;
+  cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(44,62,107,.3);
+  transition:transform .15s
+}
+.cg input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.cg input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;
+  border:2px solid #fff;box-shadow:0 1px 3px rgba(44,62,107,.3)
+}
+.rl{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8}
 
-.control-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 14px;
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-  padding: 14px 18px;
+.hero{
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:14px;text-align:center
 }
-.control-grid-3 {
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 12px;
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-  padding: 12px 16px;
-}
-@media (max-width: 600px) { .control-grid, .control-grid-3 { grid-template-columns: 1fr; } }
-.control-group label {
-  font-size: 12px; color: #64748b; display: block; margin-bottom: 3px; font-weight: 500;
-}
-.control-group label span { color: #1e293b; font-weight: 600; }
-.control-group input[type="range"] {
-  -webkit-appearance: none; appearance: none; width: 100%; height: 3px;
-  border-radius: 2px; background: #e2e8f0; outline: none; margin: 3px 0;
-}
-.control-group input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-  background: #2C3E6B; cursor: pointer; border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(44,62,107,0.3); transition: transform 0.15s;
-}
-.control-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.control-group input[type="range"]::-moz-range-thumb {
-  width: 16px; height: 16px; border-radius: 50%; background: #2C3E6B;
-  cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(44,62,107,0.3);
-}
-.range-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+.hero .lbl{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px;margin-bottom:2px}
+.hero .val{font-size:48px;font-weight:700;line-height:1.1;margin-bottom:2px;transition:color .2s}
+.hero .desc{font-size:13px;font-weight:500}
 
-.ps-hero {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-  padding: 14px; margin-bottom: 14px; text-align: center;
+.sbar{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px;margin-bottom:12px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px
 }
-.ps-hero .label { font-size: 11px; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 2px; }
-.ps-hero .value { font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; transition: color 0.2s; }
-.ps-hero .desc { font-size: 13px; font-weight: 500; }
+.sb{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.g{background:#dcfce7;color:#15803d}
+.y{background:#fef3c7;color:#92400e}
+.r{background:#fce4ec;color:#c62828}
+.b{background:#e6f1fb;color:#185fa5}
+.sd{font-size:12px;color:#64748b;flex:1}
 
-.status-bar {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-  padding: 8px 14px; margin-bottom: 12px;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+.mr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.mc{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;
+  text-align:center;flex:1;min-width:70px
 }
-.status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
-.badge-green { background: #dcfce7; color: #15803d; }
-.badge-amber { background: #fef3c7; color: #92400e; }
-.badge-red { background: #fce4ec; color: #c62828; }
-.badge-blue { background: #e6f1fb; color: #185fa5; }
-.status-desc { font-size: 12px; color: #64748b; flex: 1; }
+.mc .lbl{font-size:10px;color:#94a3b8;margin-bottom:2px;font-weight:500;letter-spacing:.3px}
+.mc .val{font-size:20px;font-weight:600;color:#1e293b;line-height:1.3}
 
-.metric-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.metric-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-  padding: 8px 10px; text-align: center; flex: 1; min-width: 70px;
+.cross{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 14px;margin-bottom:12px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;
+  font-size:12px;color:#1e293b
 }
-.metric-card .label { font-size: 10px; color: #94a3b8; margin-bottom: 2px; font-weight: 500; letter-spacing: 0.3px; }
-.metric-card .value { font-size: 20px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+.cross strong{color:#2C3E6B}
+.cross .cr{font-size:16px;font-weight:600;color:#2C3E6B}
 
-.cross-card {
-  background: linear-gradient(135deg, #E8EDF3 0%, #eef2f8 100%);
-  border: 1px solid #CDD6E4; border-radius: 12px;
-  padding: 10px 14px; margin-bottom: 12px;
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+.cv{
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:10px 14px;margin-bottom:8px
 }
-.cross-card .cl { font-size: 12px; color: #1e293b; }
-.cross-card .cl strong { color: #2C3E6B; }
-.cross-card .cv { font-size: 18px; font-weight: 600; color: #2C3E6B; }
+.cv canvas{display:block;width:100%;height:140px}
 
-.chart-box {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-  padding: 10px 14px; margin-bottom: 8px;
-}
-.chart-box canvas { display: block; width: 100%; height: 140px; }
-
-.footnote { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+.fn{font-size:11px;color:#94a3b8;line-height:1.5}
 </style>
 </head>
 <body>
@@ -104,267 +94,192 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
 <h1>PS 市销率模拟器</h1>
 <p class="subtitle">理解市值与营收的关系，以及 PS-PE-净利润率的三角联动</p>
 
-<div class="formula-card">
-  PS = 市值/营收 &emsp;=&emsp; PS = PE &times; 净利润率
-</div>
+<div class="f-card">PS = 市值/营收 &nbsp;&nbsp;=&nbsp;&nbsp; PS = PE &times; 净利润率</div>
 
-<div class="control-grid">
-  <div class="control-group">
-    <label>总市值（亿元） <span id="mcapVal">1,000</span></label>
-    <input type="range" id="mcapSlider" min="10" max="30000" value="1000" step="10">
-    <div class="range-labels"><span>10</span><span>30,000</span></div>
+<div class="cg2">
+  <div class="cg">
+    <label>总市值（亿元） <span id="mcapD">1,000</span></label>
+    <input type="range" id="mcapS" min="10" max="30000" value="1000" step="10">
+    <div class="rl"><span>10</span><span>30,000</span></div>
   </div>
-  <div class="control-group">
-    <label>营业收入（亿元） <span id="revVal">500</span></label>
-    <input type="range" id="revSlider" min="2" max="10000" value="500" step="2">
-    <div class="range-labels"><span>2</span><span>10,000</span></div>
-  </div>
-</div>
-
-<div class="ps-hero">
-  <div class="label">市销率（PS）</div>
-  <div class="value" id="psDisplay">2.00</div>
-  <div class="desc" id="psStatus">中等 — 营收定价合理</div>
-</div>
-
-<div class="status-bar">
-  <span class="status-badge badge-blue" id="statusBadge">中等</span>
-  <span class="status-desc" id="statusDesc">PS = 2.0x，处于多数行业的中间水平。需结合净利润率判断估值是否合理。</span>
-</div>
-
-<div class="metric-row">
-  <div class="metric-card">
-    <div class="label">总市值</div>
-    <div class="value" id="mcapMr">1,000亿</div>
-  </div>
-  <div class="metric-card">
-    <div class="label">营业收入</div>
-    <div class="value" id="revMr">500亿</div>
-  </div>
-  <div class="metric-card">
-    <div class="label">净利润率</div>
-    <div class="value"><span id="npmVal">15.0%</span></div>
-  </div>
-  <div class="metric-card">
-    <div class="label">隐含 PE</div>
-    <div class="value"><span id="impliedPE">13.3x</span></div>
+  <div class="cg">
+    <label>营收（亿元） <span id="revD">500</span></label>
+    <input type="range" id="revS" min="2" max="10000" value="500" step="2">
+    <div class="rl"><span>2</span><span>10,000</span></div>
   </div>
 </div>
 
-<div class="control-grid-3">
-  <div class="control-group">
-    <label>PE（市盈率） <span id="peInputVal">13.3x</span></label>
-    <input type="range" id="peSlider" min="3" max="80" value="13" step="0.5">
-    <div class="range-labels"><span>3x</span><span>80x</span></div>
+<div class="hero">
+  <div class="lbl">市销率（PS）</div>
+  <div class="val" id="psD">2.00</div>
+  <div class="desc" id="psSt">中等 — 营收定价合理</div>
+</div>
+
+<div class="sbar">
+  <span class="sb b" id="badge">中等</span>
+  <span class="sd" id="desc">PS = 2.0x，处于多数行业的中间水平。需结合净利润率判断。</span>
+</div>
+
+<div class="mr">
+  <div class="mc"><div class="lbl">总市值</div><div class="val" id="mcapMr">1,000亿</div></div>
+  <div class="mc"><div class="lbl">营收</div><div class="val" id="revMr">500亿</div></div>
+  <div class="mc"><div class="lbl">净利润率</div><div class="val" id="npmD">15.0%</div></div>
+  <div class="mc"><div class="lbl">隐含 PE</div><div class="val" id="peD">13.3x</div></div>
+</div>
+
+<div class="cg3">
+  <div class="cg">
+    <label>PE（市盈率） <span id="peIn">13.3x</span></label>
+    <input type="range" id="peS" min="3" max="80" value="13" step="0.5">
+    <div class="rl"><span>3x</span><span>80x</span></div>
   </div>
-  <div class="control-group">
-    <label>净利润率 <span id="npmSliderVal">15.0%</span></label>
-    <input type="range" id="npmSlider" min="1" max="40" value="15" step="0.5">
-    <div class="range-labels"><span>1%</span><span>40%</span></div>
+  <div class="cg">
+    <label>净利润率 <span id="npmIn">15.0%</span></label>
+    <input type="range" id="npmS" min="1" max="40" value="15" step="0.5">
+    <div class="rl"><span>1%</span><span>40%</span></div>
   </div>
-  <div class="control-group">
-    <label>PS = PE &times; NPM <span id="psCrossVal">2.00x</span></label>
-    <div style="height:28px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#2C3E6B;" id="psCrossBig">2.00x</div>
+  <div class="cg">
+    <label>PS = PE &times; NPM</label>
+    <div style="height:28px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#2C3E6B" id="psX">2.00x</div>
   </div>
 </div>
 
-<div class="cross-card">
-  <span class="cl">PS <strong id="crossPS">2.00x</strong> = PE <strong id="crossPE">13.3x</strong> &times; NPM <strong id="crossNPM">15.0%</strong></span>
-  <span class="cv" id="crossStatus">如果净利润提高到 20%，PS = 13.3&times;20% = 2.66x</span>
+<div class="cross">
+  <span>PS <strong id="cPS">2.00x</strong> = PE <strong id="cPE">13.3x</strong> &times; NPM <strong id="cNPM">15.0%</strong></span>
+  <span class="cr" id="cSt">若利润率提至20%，PS = 2.66x</span>
 </div>
 
-<div class="chart-box">
-  <canvas id="psChart" height="140"></canvas>
+<div class="cv">
+  <canvas id="chart" height="140"></canvas>
 </div>
 
-<p class="footnote">PS = 市值/营收。PS = PE &times; NPM（净利润率），给定任意两个可推算第三个。PS 不受亏损影响，适用于盈利为负的公司（SaaS、生物科技、电商早期）。低 PS 不意味着低估，需确认净利润率是否可持续。</p>
+<p class="fn">PS = 市值/营收。PS = PE &times; 净利润率，已知任意两个可推第三个。PS 不受亏损影响，适用于盈利为负的公司。低 PS 不意味着低估，需确认净利润率是否可持续。</p>
 
 <script>
-(function() {
-  var mcapS = document.getElementById('mcapSlider');
-  var revS = document.getElementById('revSlider');
-  var peS = document.getElementById('peSlider');
-  var npmS = document.getElementById('npmSlider');
-  var canvas = document.getElementById('psChart');
-  var ctx = canvas.getContext('2d');
+(function(){
+  var mS=document.getElementById('mcapS');
+  var rS=document.getElementById('revS');
+  var pS=document.getElementById('peS');
+  var nS=document.getElementById('npmS');
+  var cv=document.getElementById('chart');
+  var cx=cv.getContext('2d');
 
-  function fmtNum(n) {
-    if (n >= 10000) return (n/10000).toFixed(2) + '万亿';
-    return n.toFixed(0) + '亿';
+  function fn(n){return n>=10000?(n/10000).toFixed(2)+'万亿':n.toFixed(0)+'亿'}
+  function dp(){
+    var d=window.devicePixelRatio||1;
+    var r=cv.getBoundingClientRect();
+    cv.width=r.width*d;cv.height=r.height*d;cx.scale(d,d);
+    return{w:r.width,h:r.height}
   }
 
-  function getDPI() {
-    var dpr = window.devicePixelRatio || 1;
-    var rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-    return { w: rect.width, h: rect.height };
+  function up(){
+    var m=parseFloat(mS.value),re=parseFloat(rS.value);
+    var pe=parseFloat(pS.value),np=parseFloat(nS.value)/100;
+
+    var ps=re>0?m/re:0;
+    var ipe=np>0?ps/np:0;
+
+    document.getElementById('mcapD').textContent=fn(m);
+    document.getElementById('revD').textContent=fn(re);
+    document.getElementById('peIn').textContent=pe.toFixed(1)+'x';
+    document.getElementById('npmIn').textContent=(np*100).toFixed(1)+'%';
+
+    var d=document.getElementById('psD');
+    var st=document.getElementById('psSt');
+    var b=document.getElementById('badge');
+    var ds=document.getElementById('desc');
+
+    if(ps<0.5){
+      d.style.color='#15803d';st.textContent='极低 — 营收被低估';
+      b.textContent='极低';b.className='sb g';
+      ds.textContent='PS<0.5x，常见于传统制造业或周期底部。需确认营收质量。';
+    }else if(ps<1){
+      d.style.color='#15803d';st.textContent='偏低';
+      b.textContent='偏低';b.className='sb g';
+      ds.textContent='PS 0.5-1.0x。隐含PE='+ipe.toFixed(1)+'x，需评估营收增长前景。';
+    }else if(ps<3){
+      d.style.color='#185fa5';st.textContent='中等 — 营收定价合理';
+      b.textContent='中等';b.className='sb b';
+      ds.textContent='PS 1.0-3.0x。隐含PE='+ipe.toFixed(1)+'x，'+(ipe>25?'PE偏高需高增长支撑':'估值合理。');
+    }else if(ps<6){
+      d.style.color='#d97706';st.textContent='偏高 — 营收溢价显著';
+      b.textContent='偏高';b.className='sb y';
+      ds.textContent='PS 3.0-6.0x。常见于品牌消费和医药，隐含PE='+ipe.toFixed(1)+'x。';
+    }else{
+      d.style.color='#c62828';st.textContent='极高 — 营收泡沫风险';
+      b.textContent='极高';b.className='sb r';
+      ds.textContent='PS>6.0x。需极高增长支撑，估值对增速假设极度敏感。';
+    }
+
+    d.textContent=ps.toFixed(2);
+    document.getElementById('mcapMr').textContent=fn(m);
+    document.getElementById('revMr').textContent=fn(re);
+    document.getElementById('npmD').textContent=(np*100).toFixed(1)+'%';
+    document.getElementById('peD').textContent=ipe.toFixed(1)+'x';
+
+    var px=pe*np;
+    document.getElementById('psX').textContent=px.toFixed(2)+'x';
+    document.getElementById('cPS').textContent=px.toFixed(2)+'x';
+    document.getElementById('cPE').textContent=pe.toFixed(1)+'x';
+    document.getElementById('cNPM').textContent=(np*100).toFixed(1)+'%';
+
+    var a=Math.min(np+0.05,0.40);
+    document.getElementById('cSt').textContent='若利润率提至'+(a*100).toFixed(0)+'%，PS='+pe.toFixed(1)+'×'+(a*100).toFixed(0)+'%='+(pe*a).toFixed(2)+'x';
+
+    dr(pe);
   }
 
-  function update() {
-    var mcap = parseFloat(mcapS.value);
-    var rev = parseFloat(revS.value);
-    var pe = parseFloat(peS.value);
-    var npmPct = parseFloat(npmS.value);
-    var npm = npmPct / 100;
+  function dr(pe){
+    var dim=dp(),w=dim.w,h=dim.h;
+    var p={top:14,bottom:22,left:38,right:16};
+    var pw=w-p.left-p.right,ph=h-p.top-p.bottom;
 
-    // PS from market data
-    var psFromData = rev > 0 ? mcap / rev : 0;
+    cx.clearRect(0,0,w,h);
+    cx.fillStyle='#fafbfc';cx.fillRect(0,0,w,h);
+    cx.fillStyle='#1e293b';cx.font='10px sans-serif';cx.textAlign='left';
+    cx.fillText('不同净利润率下的PS（PE固定）',p.left,p.top-2);
 
-    // PS from PE x NPM
-    var psFromCross = pe * npm;
+    var lb=[],da=[];
+    for(var i=0;i<=19;i++){var n=2+i*38/19;lb.push(n.toFixed(0)+'%');da.push(pe*n/100);}
 
-    document.getElementById('mcapVal').textContent = fmtNum(mcap);
-    document.getElementById('revVal').textContent = fmtNum(rev);
-    document.getElementById('peInputVal').textContent = pe.toFixed(1) + 'x';
-    document.getElementById('npmSliderVal').textContent = npmPct + '%';
+    var mx=Math.max(Math.max.apply(null,da),1)*1.15;
+    var bw=pw/20*0.65;
 
-    // PS display (use data PS as primary)
-    var psVal = psFromData;
-    var psDisp = document.getElementById('psDisplay');
-    psDisp.textContent = psVal.toFixed(2);
-    var psStatus = document.getElementById('psStatus');
-    var badge = document.getElementById('statusBadge');
-    var desc = document.getElementById('statusDesc');
+    function x(i){return p.left+(i+0.5)*pw/20}
+    function y(v){return p.top+ph-(v/mx)*ph}
 
-    // Derived: implied NPM = PS/PE, implied PE = PS/NPM
-    var impliedNPM = pe > 0 ? (psFromData / pe) : 0;
-    var impliedPE = npm > 0 ? (psFromData / npm) : 0;
-
-    if (psVal < 0.5) {
-      psDisp.style.color = '#15803d';
-      psStatus.textContent = '极低 — 营收被严重低估';
-      badge.textContent = '极低'; badge.className = 'status-badge badge-green';
-      desc.textContent = 'PS < 0.5x，营收定价极低。常见于传统制造业、零售业或周期底部。需确认营收是否真实且可持续。';
-    } else if (psVal < 1.0) {
-      psDisp.style.color = '#15803d';
-      psStatus.textContent = '偏低';
-      badge.textContent = '偏低'; badge.className = 'status-badge badge-green';
-      desc.textContent = 'PS 在 0.5-1.0x 之间。隐含 PE = ' + impliedPE.toFixed(1) + 'x（基于 NPM ' + (npm*100).toFixed(1) + '%），需评估营收增长前景。';
-    } else if (psVal < 3.0) {
-      psDisp.style.color = '#185fa5';
-      psStatus.textContent = '中等 — 营收定价合理';
-      badge.textContent = '中等'; badge.className = 'status-badge badge-blue';
-      desc.textContent = 'PS 在 1.0-3.0x 之间。隐含 PE = ' + impliedPE.toFixed(1) + 'x，净利润率 ' + (npm*100).toFixed(1) + '% 时' + (impliedPE > 25 ? ' PE 偏高，需高增长支撑。' : ' 估值合理。');
-    } else if (psVal < 6.0) {
-      psDisp.style.color = '#d97706';
-      psStatus.textContent = '偏高 — 营收溢价显著';
-      badge.textContent = '偏高'; badge.className = 'status-badge badge-amber';
-      desc.textContent = 'PS 在 3.0-6.0x 之间。常见于品牌消费和医药股，需 NPM ' + (npm*100).toFixed(1) + '% 支撑，隐含 PE = ' + impliedPE.toFixed(1) + 'x。';
-    } else {
-      psDisp.style.color = '#c62828';
-      psStatus.textContent = '极高 — 营收泡沫风险';
-      badge.textContent = '极高'; badge.className = 'status-badge badge-red';
-      desc.textContent = 'PS > 6.0x，常见于高增长 SaaS 或概念股。需极高的营收增长和远期净利润率支撑，估值对增速假设极度敏感。';
+    for(var i=0;i<=19;i++){
+      var xx=x(i)-bw/2,bh=(da[i]/mx)*ph;
+      cx.fillStyle='rgba(44,62,107,0.55)';cx.fillRect(xx,y(da[i]),bw,bh);
+      cx.strokeStyle='rgba(44,62,107,0.3)';cx.lineWidth=0.5;cx.strokeRect(xx,y(da[i]),bw,bh);
     }
 
-    document.getElementById('mcapMr').textContent = fmtNum(mcap);
-    document.getElementById('revMr').textContent = fmtNum(rev);
-    document.getElementById('npmVal').textContent = npmPct + '%';
-    document.getElementById('impliedPE').textContent = impliedPE.toFixed(1) + 'x';
+    cx.fillStyle='#94a3b8';cx.font='8px sans-serif';cx.textAlign='center';
+    for(var i=0;i<=19;i+=4)cx.fillText(lb[i],x(i),p.top+ph+14);
 
-    // Cross section
-    document.getElementById('psCrossVal').textContent = psFromCross.toFixed(2) + 'x';
-    document.getElementById('psCrossBig').textContent = psFromCross.toFixed(2) + 'x';
-    document.getElementById('crossPS').textContent = psFromCross.toFixed(2) + 'x';
-    document.getElementById('crossPE').textContent = pe.toFixed(1) + 'x';
-    document.getElementById('crossNPM').textContent = npmPct + '%';
-
-    // Show what-if: if NPM changes by +5%
-    var altNPM = Math.min(npm + 0.05, 0.40);
-    var altPS = pe * altNPM;
-    var crossStatus = document.getElementById('crossStatus');
-    if (altNPM > npm) {
-      crossStatus.textContent = '如果净利润率提高到 ' + (altNPM*100).toFixed(0) + '%，PS = ' + pe.toFixed(1) + '×' + (altNPM*100).toFixed(0) + '% = ' + altPS.toFixed(2) + 'x';
-    } else {
-      crossStatus.textContent = 'PS 与净利润率正相关：利润率每提升 5%，PS 提升 ' + (pe * 0.05).toFixed(2) + 'x';
+    cx.strokeStyle='#e2e8f0';cx.lineWidth=0.5;
+    for(var v=0;v<=mx;v=+(v+mx/5).toFixed(1)){
+      if(v>mx*0.8)break;
+      cx.beginPath();cx.moveTo(p.left,y(v));cx.lineTo(p.left+pw,y(v));cx.stroke();
+      cx.fillStyle='#94a3b8';cx.font='9px sans-serif';cx.textAlign='right';cx.fillText(v.toFixed(1)+'x',p.left-4,y(v)+3);
     }
+    cx.fillStyle='#64748b';cx.font='9px sans-serif';cx.textAlign='right';cx.fillText('NPM →',p.left+pw,p.top+ph+20);
 
-    drawChart(psVal, npmPct);
-  }
-
-  function drawChart(psVal, npmPct) {
-    var dim = getDPI();
-    var w = dim.w, h = dim.h;
-    var pad = { top: 14, bottom: 22, left: 38, right: 16 };
-    var plotW = w - pad.left - pad.right;
-    var plotH = h - pad.top - pad.bottom;
-
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = '#fafbfc';
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.fillStyle = '#1e293b';
-    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('不同净利润率下的 PS（当前 PE 固定）', pad.left, pad.top - 2);
-
-    // Generate data: PS at different NPM levels (2% to 40%)
-    var pe = parseFloat(peS.value);
-    var npmMin = 2, npmMax = 40, steps = 19;
-    var labels = [], data = [];
-    for (var i = 0; i <= steps; i++) {
-      var np = npmMin + i * (npmMax - npmMin) / steps;
-      labels.push(np.toFixed(0) + '%');
-      data.push(pe * np / 100);
-    }
-
-    var maxPS = Math.max(Math.max.apply(null, data), 1) * 1.15;
-    var barWidth = plotW / (steps + 1) * 0.65;
-
-    function xPos(idx) { return pad.left + (idx + 0.5) * plotW / (steps + 1); }
-    function yPos(v) { return pad.top + plotH - (v / maxPS) * plotH; }
-
-    // Bars
-    for (var i = 0; i <= steps; i++) {
-      var x = xPos(i) - barWidth / 2;
-      var bh = (data[i] / maxPS) * plotH;
-      ctx.fillStyle = 'rgba(44, 62, 107, 0.55)';
-      ctx.fillRect(x, yPos(data[i]), barWidth, bh);
-      ctx.strokeStyle = 'rgba(44, 62, 107, 0.3)';
-      ctx.lineWidth = 0.5;
-      ctx.strokeRect(x, yPos(data[i]), barWidth, bh);
-    }
-
-    // X-axis labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '8px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'center';
-    for (var i = 0; i <= steps; i += 4) {
-      ctx.fillText(labels[i], xPos(i), pad.top + plotH + 14);
-    }
-
-    // Y-axis
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 0.5;
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
-    for (var v = 0; v <= maxPS; v = Math.round(v + maxPS / 5 / 0.5) * 0.5 || 0.5) {
-      if (v === 0) { v = 0; }
-      ctx.beginPath(); ctx.moveTo(pad.left, yPos(v)); ctx.lineTo(pad.left + plotW, yPos(v)); ctx.stroke();
-      ctx.textAlign = 'right'; ctx.fillText(v.toFixed(1) + 'x', pad.left - 4, yPos(v) + 3);
-      if (v > maxPS * 0.8) break;
-    }
-    ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif';
-    ctx.textAlign = 'right'; ctx.fillText('NPM →', pad.left + plotW, pad.top + plotH + 20);
-
-    // Current NPM marker
-    var curIdx = Math.round((npmPct - 2) / (38 / steps));
-    if (curIdx >= 0 && curIdx <= steps) {
-      ctx.fillStyle = '#d97706';
-      ctx.beginPath(); ctx.arc(xPos(curIdx), yPos(data[curIdx]), 5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#854F0B'; ctx.font = '9px sans-serif';
-      ctx.textAlign = 'center'; ctx.fillText('PS=' + data[curIdx].toFixed(2) + 'x', xPos(curIdx), yPos(data[curIdx]) - 10);
+    var np=parseFloat(nS.value);
+    var ci=Math.round((np-2)/(38/19));
+    if(ci>=0&&ci<=19){
+      cx.fillStyle='#d97706';cx.beginPath();cx.arc(x(ci),y(da[ci]),5,0,Math.PI*2);cx.fill();
+      cx.fillStyle='#854F0B';cx.font='9px sans-serif';cx.textAlign='center';
+      cx.fillText('PS='+da[ci].toFixed(2)+'x',x(ci),y(da[ci])-10);
     }
   }
 
-  mcapS.addEventListener('input', update);
-  revS.addEventListener('input', update);
-  peS.addEventListener('input', update);
-  npmS.addEventListener('input', update);
-  window.addEventListener('resize', update);
-  update();
+  mS.addEventListener('input',up);
+  rS.addEventListener('input',up);
+  pS.addEventListener('input',up);
+  nS.addEventListener('input',up);
+  window.addEventListener('resize',up);
+  up();
 })();
 </script>
 </body>
