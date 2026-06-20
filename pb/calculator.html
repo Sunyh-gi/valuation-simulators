@@ -8,87 +8,100 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: #fff; color: #1e293b; padding: 10px; max-width: 720px; margin: 0 auto;
+  background: #fff; color: #1e293b; padding: 14px 14px 10px; max-width: 720px; margin: 0 auto;
 }
 
-/* Compact header */
-.head-bar { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-.head-bar h1 { font-size:15px; font-weight:600; white-space:nowrap; }
+/* ── Header ── */
+.head-bar { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.head-bar h1 { font-size:17px; font-weight:600; white-space:nowrap; }
 .head-bar .formula {
   background: linear-gradient(135deg,#E8EDF3,#eef2f8); border:1px solid #CDD6E4;
-  border-radius:8px; padding:3px 12px; font-size:13px; font-weight:600; color:#2C3E6B;
-  white-space:nowrap;
+  border-radius:8px; padding:4px 14px; font-size:13px; font-weight:600; color:#2C3E6B; white-space:nowrap;
 }
 
-/* Control panel (shared by both slider groups) */
+/* ── Section separator ── */
+.sec { font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px; letter-spacing:0.3px; }
+
+/* ── Control panels ── */
 .cp {
-  display:grid; grid-template-columns:1fr 1fr; gap:8px;
-  background:#fff; border:1px solid #e2e8f0; border-radius:10px;
-  padding:6px 10px 4px; margin-bottom:6px;
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:8px 12px 6px; margin-bottom:7px;
 }
 .cp3 { grid-template-columns:1fr 1fr 1fr; }
 .cp label {
-  font-size:11px; color:#64748b; display:flex; justify-content:space-between; margin-bottom:1px;
+  font-size:11px; color:#64748b; display:flex; justify-content:space-between; margin-bottom:2px;
 }
-.cp label span { color:#1e293b; font-weight:600; font-size:11px; }
+.cp label span { color:#1e293b; font-weight:600; }
 .cp input[type="range"] {
-  -webkit-appearance:none; appearance:none; width:100%; height:2px;
-  border-radius:1px; background:#e2e8f0; outline:none; margin:1px 0;
+  -webkit-appearance:none; appearance:none; width:100%; height:3px;
+  border-radius:2px; background:#e2e8f0; outline:none; margin:2px 0;
 }
 .cp input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance:none; width:12px; height:12px; border-radius:50%;
-  background:#2C3E6B; cursor:pointer; border:1.5px solid #fff;
-  box-shadow:0 1px 2px rgba(44,62,107,0.3);
+  -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+  background:#2C3E6B; cursor:pointer; border:2px solid #fff;
+  box-shadow:0 1px 3px rgba(44,62,107,0.3);
 }
 .cp input[type="range"]::-moz-range-thumb {
-  width:12px; height:12px; border-radius:50%; background:#2C3E6B;
-  cursor:pointer; border:1.5px solid #fff; box-shadow:0 1px 2px rgba(44,62,107,0.3);
+  width:14px; height:14px; border-radius:50%; background:#2C3E6B; cursor:pointer;
+  border:2px solid #fff; box-shadow:0 1px 3px rgba(44,62,107,0.3);
 }
 .cp .rl { display:flex; justify-content:space-between; font-size:9px; color:#94a3b8; }
-@media (max-width:480px) {
-  .cp3 { grid-template-columns:1fr; }
-}
+@media (max-width:480px) { .cp3 { grid-template-columns:1fr; } }
 
-/* PB main display */
+/* ── PB display row ── */
 .pb-row {
-  display:flex; align-items:center; gap:10px;
-  background:#fff; border:1px solid #e2e8f0; border-radius:10px;
-  padding:6px 14px; margin-bottom:6px;
+  display:flex; align-items:center; gap:12px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:8px 14px; margin-bottom:7px;
 }
-.pb-main { flex-shrink:0; text-align:center; min-width:60px; }
-.pb-main .lbl { font-size:9px; color:#94a3b8; letter-spacing:0.3px; }
-.pb-main .val { font-size:32px; font-weight:700; line-height:1.1; transition:color 0.2s; }
-.pb-meta { flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; }
+.pb-main { flex-shrink:0; text-align:center; min-width:70px; }
+.pb-main .lbl { font-size:10px; color:#94a3b8; letter-spacing:0.4px; }
+.pb-main .val { font-size:40px; font-weight:700; line-height:1.15; transition:color 0.2s; }
+.pb-meta { flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; }
 .pb-meta .badge {
-  font-size:10px; font-weight:600; padding:2px 8px; border-radius:12px; white-space:nowrap;
+  font-size:11px; font-weight:600; padding:3px 10px; border-radius:14px; white-space:nowrap;
 }
 .bg-green { background:#dcfce7; color:#15803d; }
 .bg-amber { background:#fef3c7; color:#92400e; }
 .bg-red { background:#fce4ec; color:#c62828; }
 .bg-blue { background:#e6f1fb; color:#185fa5; }
-.pb-meta .s { font-size:11px; color:#64748b; }
+.pb-meta .s { font-size:12px; color:#64748b; }
 .pb-meta .s b { color:#1e293b; }
 .pb-meta .theo-badge {
-  font-size:10px; padding:2px 8px; border-radius:6px; white-space:nowrap;
+  font-size:11px; padding:3px 10px; border-radius:8px; white-space:nowrap; font-weight:500;
 }
 
-/* Metric row */
-.mr { display:flex; gap:5px; margin-bottom:6px; }
+/* ── Metric row ── */
+.mr { display:flex; gap:6px; margin-bottom:7px; }
 .mr-card {
-  background:#fff; border:1px solid #e2e8f0; border-radius:8px;
-  padding:5px 6px; text-align:center; flex:1; min-width:60px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:9px;
+  padding:6px 8px; text-align:center; flex:1; min-width:60px;
 }
-.mr-card .lbl { font-size:9px; color:#94a3b8; font-weight:500; letter-spacing:0.2px; }
-.mr-card .val { font-size:16px; font-weight:600; color:#1e293b; line-height:1.3; }
+.mr-card .lbl { font-size:10px; color:#94a3b8; font-weight:500; margin-bottom:2px; }
+.mr-card .val { font-size:18px; font-weight:600; color:#1e293b; line-height:1.3; }
 
-/* Chart */
+/* ── Theory card (inline in cp3 area) ── */
+.theo-bar {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background: linear-gradient(135deg,#fefce8,#fef9e7);
+  border:1px solid #fde68a; border-radius:8px;
+  padding:5px 12px; margin-top:0; margin-bottom:7px;
+}
+.theo-bar .tl { font-size:11px; color:#92400e; }
+.theo-bar .tv { font-size:22px; font-weight:700; color:#92400e; }
+.theo-bar .tg {
+  font-size:11px; padding:2px 10px; border-radius:6px; white-space:nowrap; font-weight:500;
+}
+
+/* ── Chart ── */
 .cv {
-  background:#fff; border:1px solid #e2e8f0; border-radius:10px;
-  padding:6px 10px; margin-bottom:4px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:8px 12px 6px; margin-bottom:5px;
 }
-.cv canvas { display:block; width:100%; height:130px; }
+.cv canvas { display:block; width:100%; height:160px; }
 
-/* Footer note */
+/* ── Footer ── */
 .fn { font-size:10px; color:#94a3b8; line-height:1.4; }
 </style>
 </head>
@@ -101,20 +114,21 @@ body {
 </div>
 
 <!-- Basic parameters -->
+<div class="sec">基础参数</div>
 <div class="cp">
-  <div class="cg">
+  <div>
     <label>总市值（亿） <span id="mcapVal">2,000</span></label>
     <input type="range" id="mcapSlider" min="10" max="30000" value="2000" step="10">
     <div class="rl"><span>10</span><span>30,000</span></div>
   </div>
-  <div class="cg">
+  <div>
     <label>净资产（亿） <span id="equityVal">1,000</span></label>
     <input type="range" id="equitySlider" min="5" max="15000" value="1000" step="5">
     <div class="rl"><span>5</span><span>15,000</span></div>
   </div>
 </div>
 
-<!-- PB main display + status + theory -->
+<!-- PB main display -->
 <div class="pb-row">
   <div class="pb-main">
     <div class="lbl">PB</div>
@@ -150,31 +164,39 @@ body {
 </div>
 
 <!-- PB-ROE theoretical model -->
+<div class="sec">PB-ROE 理论估值模型</div>
 <div class="cp cp3">
-  <div class="cg">
+  <div>
     <label>ROE <span id="roeVal">12%</span></label>
     <input type="range" id="roeSlider" min="2" max="40" value="12" step="0.5">
     <div class="rl"><span>2%</span><span>40%</span></div>
   </div>
-  <div class="cg">
-    <label>r 权益成本 <span id="rVal">10%</span></label>
+  <div>
+    <label>权益成本 r <span id="rVal">10%</span></label>
     <input type="range" id="rSlider" min="6" max="18" value="10" step="0.5">
     <div class="rl"><span>6%</span><span>18%</span></div>
   </div>
-  <div class="cg">
-    <label>g 永续增长率 <span id="gVal">3%</span></label>
+  <div>
+    <label>永续增长率 g <span id="gVal">3%</span></label>
     <input type="range" id="gSlider" min="0" max="8" value="3" step="0.5">
     <div class="rl"><span>0%</span><span>8%</span></div>
   </div>
 </div>
 
+<!-- Theory comparison bar -->
+<div class="theo-bar">
+  <span class="tl">理论 PB（戈登模型）</span>
+  <span class="tv" id="theoPB">1.29</span>
+  <span class="tg" id="theoGap2" style="background:#fef3c7;color:#92400e;">当前 PB 2.00 高于理论值 16.7%</span>
+</div>
+
 <!-- Chart -->
 <div class="cv">
-  <canvas id="pbChart" height="130"></canvas>
+  <canvas id="pbChart" height="160"></canvas>
 </div>
 
 <!-- Footer -->
-<p class="fn">理论 PB = (ROE - g) / (r - g)。PB &gt; 1 溢价，PB &lt; 1 破净。银行/保险/地产估值首选，互联网/软件股参考有限。</p>
+<p class="fn">理论 PB = (ROE - g) / (r - g)。PB &gt; 1 溢价，PB &lt; 1 破净。银行/保险/地产估值首选，互联网/软件参考有限。</p>
 
 <script>
 (function() {
@@ -212,72 +234,59 @@ body {
     var rPct = parseFloat(rS.value);
     var gPct = parseFloat(gS.value);
 
-    var roe = roePct / 100;
-    var r = rPct / 100;
-    var g = gPct / 100;
-
+    var roe = roePct / 100, r = rPct / 100, g = gPct / 100;
     var pb = equity > 0 ? (mcap / equity) : 0;
     var premium = ((pb - 1) * 100);
     var premiumStr = premium >= 0 ? '+' + premium.toFixed(1) + '%' : premium.toFixed(1) + '%';
     var implRoe = (r - g) * pb + g;
     if (!isFinite(implRoe) || implRoe < 0) implRoe = 0;
 
-    // Theoretical PB
     var theoPB = 0, theoValid = false;
     if (roe > g && r > g && r > 0) { theoPB = (roe - g) / (r - g); theoValid = true; }
 
-    // Update labels
     document.getElementById('mcapVal').textContent = fmtShort(mcap);
     document.getElementById('equityVal').textContent = fmtShort(equity);
     document.getElementById('roeVal').textContent = roePct + '%';
     document.getElementById('rVal').textContent = rPct + '%';
     document.getElementById('gVal').textContent = gPct + '%';
 
-    // PB main display
+    // PB display
     var pbDisp = document.getElementById('pbDisplay');
     pbDisp.textContent = pb.toFixed(2);
     var badge = document.getElementById('statusBadge');
-    var theoGap = document.getElementById('theoGap');
 
-    if (pb < 0.5) {
-      pbDisp.style.color = '#c62828';
-      badge.textContent = '深度破净'; badge.className = 'badge bg-red';
-    } else if (pb < 0.8) {
-      pbDisp.style.color = '#d97706';
-      badge.textContent = '破净'; badge.className = 'badge bg-amber';
-    } else if (pb < 1.2) {
-      pbDisp.style.color = '#185fa5';
-      badge.textContent = '平价'; badge.className = 'badge bg-blue';
-    } else if (pb < 2.5) {
-      pbDisp.style.color = '#15803d';
-      badge.textContent = '溢价'; badge.className = 'badge bg-green';
-    } else {
-      pbDisp.style.color = '#15803d';
-      badge.textContent = '高度溢价'; badge.className = 'badge bg-green';
-    }
+    if (pb < 0.5) { pbDisp.style.color='#c62828'; badge.textContent='深度破净'; badge.className='badge bg-red'; }
+    else if (pb < 0.8) { pbDisp.style.color='#d97706'; badge.textContent='破净'; badge.className='badge bg-amber'; }
+    else if (pb < 1.2) { pbDisp.style.color='#185fa5'; badge.textContent='平价'; badge.className='badge bg-blue'; }
+    else if (pb < 2.5) { pbDisp.style.color='#15803d'; badge.textContent='溢价'; badge.className='badge bg-green'; }
+    else { pbDisp.style.color='#15803d'; badge.textContent='高度溢价'; badge.className='badge bg-green'; }
 
-    // PB meta inline
     document.getElementById('mcapMetric').textContent = fmtShort(mcap);
     document.getElementById('equityMetric').textContent = fmtShort(equity);
     document.getElementById('premiumMetric').textContent = premiumStr;
     document.getElementById('impliedROE').textContent = (implRoe * 100).toFixed(1) + '%';
 
-    // Theory comparison
+    // Theory comparison (two badges: pb-row + theo-bar)
+    var theoGap = document.getElementById('theoGap');
+    var theoGap2 = document.getElementById('theoGap2');
     if (theoValid) {
       var gapPct = theoPB > 0 ? ((pb / theoPB) - 1) * 100 : 0;
-      var txt;
-      if (Math.abs(gapPct) < 5) { txt = '≈理论值'; theoGap.style.background='#dcfce7'; theoGap.style.color='#15803d'; }
-      else if (gapPct > 0) { txt = '偏高 ' + gapPct.toFixed(1) + '%'; theoGap.style.background='#fef3c7'; theoGap.style.color='#92400e'; }
-      else { txt = '偏低 ' + Math.abs(gapPct).toFixed(1) + '%'; theoGap.style.background='#e6f1fb'; theoGap.style.color='#185fa5'; }
-      theoGap.textContent = txt;
+      var txt, bg, clr;
+      if (Math.abs(gapPct) < 5) { txt='接近理论值'; bg='#dcfce7'; clr='#15803d'; }
+      else if (gapPct > 0) { txt='偏高 '+gapPct.toFixed(1)+'%'; bg='#fef3c7'; clr='#92400e'; }
+      else { txt='偏低 '+Math.abs(gapPct).toFixed(1)+'%'; bg='#e6f1fb'; clr='#185fa5'; }
+      theoGap.textContent = txt; theoGap.style.background=bg; theoGap.style.color=clr;
+      theoGap2.textContent = '当前 PB '+pb.toFixed(2)+' 高于理论值 '+gapPct.toFixed(1)+'%';
+      theoGap2.style.background=bg; theoGap2.style.color=clr;
     } else {
-      theoGap.textContent = 'ROE≤g';
-      theoGap.style.background = '#f1f5f9'; theoGap.style.color = '#64748b';
+      theoGap.textContent='ROE≤g'; theoGap.style.background='#f1f5f9'; theoGap.style.color='#64748b';
+      theoGap2.textContent='需满足 ROE > g 且 r > g';
+      theoGap2.style.background='#f1f5f9'; theoGap2.style.color='#64748b';
     }
 
-    // Metric row
-    document.getElementById('mcapMr').textContent = fmtShort(mcap).replace('亿','') + '亿';
-    document.getElementById('equityMr').textContent = fmtShort(equity).replace('亿','') + '亿';
+    document.getElementById('theoPB').textContent = theoValid ? theoPB.toFixed(2) : '—';
+    document.getElementById('mcapMr').textContent = fmtShort(mcap);
+    document.getElementById('equityMr').textContent = fmtShort(equity);
     document.getElementById('pbMr').textContent = pb.toFixed(2) + 'x';
     document.getElementById('theoMr').textContent = theoValid ? theoPB.toFixed(2) + 'x' : '—';
 
@@ -287,7 +296,7 @@ body {
   function drawChart(roePct, rPct, gPct, currentPB) {
     var dim = getDPI();
     var w = dim.w, h = dim.h;
-    var pad = { top: 14, bottom: 18, left: 38, right: 10 };
+    var pad = { top:16, bottom:20, left:40, right:10 };
     var plotW = w - pad.left - pad.right;
     var plotH = h - pad.top - pad.bottom;
 
@@ -295,69 +304,44 @@ body {
     ctx.fillStyle = '#fafbfc';
     ctx.fillRect(0, 0, w, h);
 
-    var xMin = 2, xMax = 40;
-    var yMin = 0, yMax = 6;
+    var xMin=2, xMax=40, yMin=0, yMax=6;
+    function xPos(v) { return pad.left + (v-xMin)/(xMax-xMin)*plotW; }
+    function yPos(v) { return pad.top + plotH - (v-yMin)/(yMax-yMin)*plotH; }
 
-    function xPos(val) { return pad.left + (val - xMin) / (xMax - xMin) * plotW; }
-    function yPos(val) { return pad.top + plotH - (val - yMin) / (yMax - yMin) * plotH; }
-
-    // Grid
-    ctx.strokeStyle = '#f1f5f9';
-    ctx.lineWidth = 0.5;
-    for (var y = 0; y <= 6; y += 1) {
+    ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=0.5;
+    for (var y=0;y<=6;y+=1) {
       ctx.beginPath(); ctx.moveTo(pad.left, yPos(y)); ctx.lineTo(pad.left+plotW, yPos(y)); ctx.stroke();
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'right'; ctx.fillText(y.toFixed(1)+'x', pad.left-4, yPos(y)+3);
+      ctx.fillStyle='#94a3b8'; ctx.font='10px sans-serif'; ctx.textAlign='right'; ctx.fillText(y.toFixed(1)+'x', pad.left-4, yPos(y)+4);
     }
-    for (var x = 5; x <= 40; x += 5) {
+    for (var x=5;x<=40;x+=5) {
       ctx.beginPath(); ctx.moveTo(xPos(x), pad.top); ctx.lineTo(xPos(x), pad.top+plotH); ctx.stroke();
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'center'; ctx.fillText(x+'%', xPos(x), pad.top+plotH+12);
+      ctx.fillStyle='#94a3b8'; ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText(x+'%', xPos(x), pad.top+plotH+14);
     }
 
-    // PB=1 line
-    ctx.strokeStyle = '#fecaca'; ctx.lineWidth = 0.8;
-    ctx.setLineDash([3,2]);
+    ctx.strokeStyle='#fecaca'; ctx.lineWidth=0.8; ctx.setLineDash([3,2]);
     ctx.beginPath(); ctx.moveTo(pad.left, yPos(1)); ctx.lineTo(pad.left+plotW, yPos(1)); ctx.stroke();
-    ctx.fillStyle = '#ef4444'; ctx.font = '8px sans-serif';
-    ctx.textAlign = 'left'; ctx.fillText('PB=1', pad.left+plotW-38, yPos(1)-3);
+    ctx.fillStyle='#ef4444'; ctx.font='9px sans-serif'; ctx.textAlign='left'; ctx.fillText('PB=1', pad.left+plotW-38, yPos(1)-3);
     ctx.setLineDash([]);
 
-    // PB-ROE curve
-    ctx.strokeStyle = '#2C3E6B'; ctx.lineWidth = 1.8;
+    ctx.strokeStyle='#2C3E6B'; ctx.lineWidth=2;
     ctx.beginPath();
-    var started = false;
-    for (var rv = 2; rv <= 40; rv += 0.5) {
-      var rdec = rv/100, rv2 = rPct/100, gv2 = gPct/100;
-      if (rdec > gv2 && rv2 > gv2) {
-        var tv = (rdec - gv2) / (rv2 - gv2);
-        if (tv >= 0 && tv <= 6) {
-          if (!started) { ctx.moveTo(xPos(rv), yPos(tv)); started = true; }
-          else { ctx.lineTo(xPos(rv), yPos(tv)); }
-        }
-      }
+    var started=false;
+    for (var rv=2;rv<=40;rv+=0.5) {
+      var rd=rv/100, r2=rPct/100, g2=gPct/100;
+      if (rd>g2 && r2>g2) { var tv=(rd-g2)/(r2-g2); if (tv>=0&&tv<=6) { if(!started){ctx.moveTo(xPos(rv),yPos(tv));started=true;} else ctx.lineTo(xPos(rv),yPos(tv)); } }
     }
     ctx.stroke();
 
-    // Current ROE marker
-    var curX = xPos(roePct);
-    var roeD = roePct/100, rD = rPct/100, gD = gPct/100;
-    var theoY = (roeD > gD && rD > gD) ? (roeD-gD)/(rD-gD) : -1;
-    if (theoY >= 0 && theoY <= 6) {
-      ctx.fillStyle = '#d97706';
-      ctx.beginPath(); ctx.arc(curX, yPos(theoY), 4, 0, Math.PI*2); ctx.fill();
-    }
+    var curX=xPos(roePct);
+    var roeD=roePct/100, rD=rPct/100, gD=gPct/100;
+    var theoY=(roeD>gD&&rD>gD)?(roeD-gD)/(rD-gD):-1;
+    if (theoY>=0&&theoY<=6) { ctx.fillStyle='#d97706'; ctx.beginPath(); ctx.arc(curX, yPos(theoY), 5, 0, Math.PI*2); ctx.fill(); }
 
-    // Current PB line
-    if (currentPB <= 6) {
-      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 0.8;
-      ctx.setLineDash([2,2]);
+    if (currentPB<=6) {
+      ctx.strokeStyle='#d97706'; ctx.lineWidth=0.8; ctx.setLineDash([2,2]);
       ctx.beginPath(); ctx.moveTo(pad.left, yPos(currentPB)); ctx.lineTo(pad.left+plotW, yPos(currentPB)); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = '#d97706'; ctx.font = '8px sans-serif';
-      ctx.textAlign = 'right'; ctx.fillText('当前PB='+currentPB.toFixed(2), pad.left+plotW, yPos(currentPB)-2);
+      ctx.fillStyle='#d97706'; ctx.font='9px sans-serif'; ctx.textAlign='right'; ctx.fillText('当前PB='+currentPB.toFixed(2), pad.left+plotW, yPos(currentPB)-3);
     }
   }
 
