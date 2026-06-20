@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PE 敏感性模拟器</title>
+<title>PE-ROE 敏感性模拟器</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -70,27 +70,35 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
 .metric-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .metric-card {
   background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-  padding: 8px 10px; text-align: center; flex: 1; min-width: 80px;
+  padding: 8px 10px; text-align: center; flex: 1; min-width: 70px;
 }
 .metric-card .label { font-size: 10px; color: #94a3b8; margin-bottom: 2px; font-weight: 500; letter-spacing: 0.3px; }
 .metric-card .value { font-size: 20px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+
+.roe-note {
+  background: linear-gradient(135deg, #fefce8 0%, #fef9e7 100%);
+  border: 1px solid #fde68a; border-radius: 10px;
+  padding: 8px 14px; margin-bottom: 10px; font-size: 12px; line-height: 1.5;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.roe-note strong { font-weight: 600; }
 
 .chart-box {
   background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
   padding: 10px 14px; margin-bottom: 10px;
 }
-.chart-box canvas { display: block; width: 100%; height: 160px; }
+.chart-box canvas { display: block; width: 100%; height: 150px; }
 
 .footnote { font-size: 11px; color: #94a3b8; line-height: 1.5; }
 </style>
 </head>
 <body>
 
-<h1>PE 敏感性模拟器</h1>
-<p class="subtitle">基于戈登增长模型，观察 PE 对 r、g、留存率的敏感度</p>
+<h1>PE-ROE 敏感性模拟器</h1>
+<p class="subtitle">通过 ROE、股权成本 r、留存率 b 联动观察 PE 的变化</p>
 
 <div class="formula-card">
-  PE = (1 <span class="sep">−</span> b) <span class="sep">/</span> (r <span class="sep">−</span> g) &emsp;=&emsp; g = b <span class="sep">×</span> ROE
+  PE = (1 <span class="sep">−</span> b) <span class="sep">/</span> (r <span class="sep">−</span> g) &emsp; g = b <span class="sep">×</span> ROE &emsp; PE = (1 <span class="sep">−</span> b) <span class="sep">/</span> (r <span class="sep">−</span> b <span class="sep">×</span> ROE)
 </div>
 
 <div class="control-grid-3">
@@ -100,9 +108,9 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     <div class="range-labels"><span>6%</span><span>16%</span></div>
   </div>
   <div class="control-group">
-    <label>永续增长率 g <span id="gVal">3.0%</span></label>
-    <input type="range" id="gSlider" min="0" max="8" value="3" step="0.5">
-    <div class="range-labels"><span>0%</span><span>8%</span></div>
+    <label>ROE（净资产收益率） <span id="roeVal">12.0%</span></label>
+    <input type="range" id="roeSlider" min="2" max="30" value="12" step="0.5">
+    <div class="range-labels"><span>2%</span><span>30%</span></div>
   </div>
   <div class="control-group">
     <label>留存率 b <span id="bVal">60%</span></label>
@@ -119,7 +127,7 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
 
 <div class="status-bar">
   <span class="status-badge badge-blue" id="statusBadge">合理</span>
-  <span class="status-desc" id="statusDesc">r − g = 7.0%，安全边际充足，PE 处于合理范围。</span>
+  <span class="status-desc" id="statusDesc">PE 处于合理区间。ROE > r，增加留存率可提升 PE。</span>
 </div>
 
 <div class="metric-row">
@@ -128,25 +136,34 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     <div class="value" id="payResult">40%</div>
   </div>
   <div class="metric-card">
-    <div class="label">安全边际 r − g</div>
-    <div class="value" id="spreadResult">7.0%</div>
+    <div class="label">g = b×ROE</div>
+    <div class="value" id="gResult">7.2%</div>
   </div>
   <div class="metric-card">
-    <div class="label">ROE（g/b）</div>
-    <div class="value" id="roeResult">—</div>
+    <div class="label">r − g</div>
+    <div class="value" id="spreadResult">2.8%</div>
   </div>
+  <div class="metric-card">
+    <div class="label">ROE − r</div>
+    <div class="value" id="roeRSpreadResult">+2.0%</div>
+  </div>
+</div>
+
+<div class="roe-note" id="roeNote">
+  <strong id="roeNoteLabel">✅ 价值创造</strong>
+  <span id="roeNoteText">ROE 12.0% > r 10.0%，留存利润创造的回报高于资本成本，b 越高 PE 越高。</span>
 </div>
 
 <div class="chart-box">
-  <canvas id="peChart" height="160"></canvas>
+  <canvas id="peChart" height="150"></canvas>
 </div>
 
-<p class="footnote">戈登增长模型链：g = b × ROE → PE = (1 − b) / (r − b × ROE)。ROE 越高，可持续增长率 g 越高，PE 越高。当 g 接近 r 时 PE 发散（趋近无穷），模型失效。留存率 b 增大虽然推高 g，但会降低分红率(1−b)，两者对 PE 的影响方向相反。</p>
+<p class="footnote">戈登增长模型链：g = b×ROE → PE = (1−b)/(r−b×ROE)。ROE &gt; r 时，留存创造价值，b ↑ → PE ↑；ROE &lt; r 时，留存毁灭价值，b ↑ → PE ↓；ROE = r 时，留存无关紧要（Miller-Modigliani 股利无关论）。</p>
 
 <script>
 (function() {
   var rS = document.getElementById('rSlider');
-  var gS = document.getElementById('gSlider');
+  var roeS = document.getElementById('roeSlider');
   var bS = document.getElementById('bSlider');
   var canvas = document.getElementById('peChart');
   var ctx = canvas.getContext('2d');
@@ -162,21 +179,52 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
 
   function update() {
     var r = parseFloat(rS.value) / 100;
-    var g = parseFloat(gS.value) / 100;
+    var roe = parseFloat(roeS.value) / 100;
     var b = parseFloat(bS.value) / 100;
+
+    var g = b * roe;
     var spread = r - g;
-    var pe = spread > 0 ? (1 - b) / spread : null;
+    var pe = spread > 0.001 ? (1 - b) / spread : null;
 
     document.getElementById('rVal').textContent = (r * 100).toFixed(1) + '%';
-    document.getElementById('gVal').textContent = (g * 100).toFixed(1) + '%';
+    document.getElementById('roeVal').textContent = (roe * 100).toFixed(1) + '%';
     document.getElementById('bVal').textContent = (b * 100).toFixed(0) + '%';
     document.getElementById('payResult').textContent = ((1 - b) * 100).toFixed(0) + '%';
+    document.getElementById('gResult').textContent = (g * 100).toFixed(1) + '%';
     document.getElementById('spreadResult').textContent = (spread * 100).toFixed(1) + '%';
 
-    // 隐含 ROE = g / b（可持续增长率公式 g = b × ROE 的反推）
-    var roe = b > 0.001 ? g / b : 0;
-    document.getElementById('roeResult').textContent = roe > 0 ? (roe * 100).toFixed(1) + '%' : 'N/A';
+    var roeRSpread = roe - r;
+    var roeRStr = roeRSpread >= 0 ? '+' + (roeRSpread * 100).toFixed(1) + '%' : (roeRSpread * 100).toFixed(1) + '%';
+    document.getElementById('roeRSpreadResult').textContent = roeRStr;
 
+    // ROE vs r note
+    var noteLabel = document.getElementById('roeNoteLabel');
+    var noteText = document.getElementById('roeNoteText');
+    var noteBox = document.getElementById('roeNote');
+    if (Math.abs(roeRSpread) < 0.002) {
+      noteLabel.textContent = '⚖️ Miller-Modigliani';
+      noteText.textContent = 'ROE ' + (roe*100).toFixed(1) + '% ≈ r ' + (r*100).toFixed(1) + '%，分红与留存对 PE 无影响。';
+      noteBox.style.background = 'linear-gradient(135deg,#f0f7ff,#e6f1fb)';
+      noteBox.style.borderColor = '#b5d4f4';
+      noteLabel.style.color = '#185fa5';
+      noteText.style.color = '#1e4976';
+    } else if (roe > r) {
+      noteLabel.textContent = '✅ 价值创造';
+      noteText.textContent = 'ROE ' + (roe*100).toFixed(1) + '% > r ' + (r*100).toFixed(1) + '%，留存利润创造的回报高于资本成本，b 越高 PE 越高。';
+      noteBox.style.background = 'linear-gradient(135deg,#fefce8,#fef9e7)';
+      noteBox.style.borderColor = '#fde68a';
+      noteLabel.style.color = '#15803d';
+      noteText.style.color = '#92400e';
+    } else {
+      noteLabel.textContent = '⚠️ 价值毁灭';
+      noteText.textContent = 'ROE ' + (roe*100).toFixed(1) + '% < r ' + (r*100).toFixed(1) + '%，留存利润创造的回报低于资本成本，应多分红，b 越高 PE 越低。';
+      noteBox.style.background = 'linear-gradient(135deg,#fce4ec,#fde8eb)';
+      noteBox.style.borderColor = '#f7c1c1';
+      noteLabel.style.color = '#c62828';
+      noteText.style.color = '#791f1f';
+    }
+
+    // PE display
     var peEl = document.getElementById('peResult');
     var statusEl = document.getElementById('peStatus');
     var badge = document.getElementById('statusBadge');
@@ -187,37 +235,37 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
       peEl.style.color = '#c62828';
       statusEl.textContent = '模型失效 — g 接近 r，PE 趋近无穷';
       badge.textContent = '失效'; badge.className = 'status-badge badge-red';
-      desc.textContent = 'g 已接近或超过 r，戈登增长模型不再适用。实际中此类公司通常无稳定分红或处于高增长阶段。';
+      desc.textContent = 'g = ' + (g*100).toFixed(1) + '% 已接近 r = ' + (r*100).toFixed(1) + '%，戈登模型不再适用。此时 ROE ' + (roe*100).toFixed(1) + '% 远高于 r，缺乏可持续性假设。';
     } else if (pe >= 50) {
       peEl.textContent = '>50x';
       peEl.style.color = '#d97706';
       statusEl.textContent = '极高估值 — g 非常接近 r';
       badge.textContent = '极高'; badge.className = 'status-badge badge-amber';
-      desc.textContent = 'PE > 50x，增长预期极高。需验证 g 假设是否可持续，以及股权成本 r 是否被低估。';
+      desc.textContent = 'PE > 50x，增长预期极高。g = ' + (g*100).toFixed(1) + '% 距 r 仅 ' + ((r-g)*100).toFixed(1) + ' 个百分点，估值对微小的参数变化极度敏感。';
     } else if (pe >= 25) {
       peEl.textContent = pe.toFixed(1) + 'x';
       peEl.style.color = '#d97706';
       statusEl.textContent = '偏高估 — 增长溢价较高';
       badge.textContent = '偏高'; badge.className = 'status-badge badge-amber';
-      desc.textContent = 'PE 在 25-50x 之间，市场为增长支付了显著溢价。需确认增长率假设的质量和可持续性。';
+      desc.textContent = 'PE 在 25-50x 之间。ROE(' + (roe*100).toFixed(1) + '%) ' + (roe > r ? '>' : '<') + ' r(' + (r*100).toFixed(1) + '%)，' + (roe > r ? '留存创造价值。' : '分红优于留存。');
     } else if (pe >= 10) {
       peEl.textContent = pe.toFixed(1) + 'x';
       peEl.style.color = '#185fa5';
       statusEl.textContent = '合理估值区间';
       badge.textContent = '合理'; badge.className = 'status-badge badge-blue';
-      desc.textContent = 'PE 在 10-25x 之间，处于多数成熟行业的典型估值区间。r − g = ' + (spread * 100).toFixed(1) + '%，ROE = ' + (roe * 100).toFixed(1) + '%（g/b），安全边际充足。';
+      desc.textContent = 'PE 在 10-25x 之间。ROE(' + (roe*100).toFixed(1) + '%) ' + (roe > r ? '>' : '<') + ' r(' + (r*100).toFixed(1) + '%)，r−g = ' + (spread*100).toFixed(1) + '%，安全边际' + (spread > 0.03 ? '充足。' : '偏薄。');
     } else {
       peEl.textContent = pe.toFixed(1) + 'x';
       peEl.style.color = '#15803d';
       statusEl.textContent = '低估 — 安全边际充足';
       badge.textContent = '低估'; badge.className = 'status-badge badge-green';
-      desc.textContent = 'PE < 10x，市场定价保守。当前 ROE = ' + (roe * 100).toFixed(1) + '%' + (roe > 0.15 ? '，盈利能力稳健，可能是价值股机会。' : '，偏低，需警惕价值陷阱。');
+      desc.textContent = 'PE < 10x。ROE(' + (roe*100).toFixed(1) + '%) ' + (roe > r ? '>' : '<') + ' r(' + (r*100).toFixed(1) + '%)，' + (roe > r ? '高 ROE 低 PE，可能是价值股机会。' : '低 ROE 低 PE，需警惕价值陷阱。');
     }
 
-    drawChart(r, b);
+    drawChart(r, roe, b);
   }
 
-  function drawChart(r, b) {
+  function drawChart(r, roe, b) {
     var dim = getDPI();
     var w = dim.w, h = dim.h;
     var pad = { top: 14, bottom: 22, left: 38, right: 16 };
@@ -228,22 +276,27 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     ctx.fillStyle = '#fafbfc';
     ctx.fillRect(0, 0, w, h);
 
-    // Generate data: PE vs g for g = 0% to 8% (17 points)
+    ctx.fillStyle = '#1e293b';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('不同留存率 b 下的 PE', pad.left, pad.top - 2);
+
+    // Generate data: PE at different b levels (0% to 100%)
     var labels = [], data = [];
-    for (var i = 0; i <= 16; i++) {
-      var g = i * 0.5 / 100;
-      labels.push((g * 100).toFixed(1) + '%');
-      var spread = r - g;
-      if (spread > 0.002) {
-        var pe = (1 - b) / spread;
-        data.push(pe > 50 ? null : Math.round(pe * 10) / 10);
+    for (var i = 0; i <= 20; i++) {
+      var bi = i * 5 / 100; // b from 0% to 100%
+      labels.push((bi * 100).toFixed(0) + '%');
+      var gi = bi * roe;
+      var sp = r - gi;
+      if (sp > 0.002) {
+        var pei = (1 - bi) / sp;
+        data.push(pei > 50 ? null : Math.round(pei * 10) / 10);
       } else {
         data.push(null);
       }
     }
 
-    // Chart dimensions
-    var barWidth = plotW / labels.length * 0.65;
+    var barWidth = plotW / labels.length * 0.6;
     var maxPE = 50;
 
     function xPos(idx) { return pad.left + (idx + 0.5) * plotW / labels.length; }
@@ -254,16 +307,11 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
       var x = xPos(i) - barWidth / 2;
       if (data[i] !== null && data[i] > 0) {
         var bh = (data[i] / maxPE) * plotH;
-        var grad = ctx.createLinearGradient(0, yPos(data[i]), 0, pad.top + plotH);
-        grad.addColorStop(0, 'rgba(60, 52, 137, 0.7)');
-        grad.addColorStop(1, 'rgba(60, 52, 137, 0.2)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.roundRect(x, yPos(data[i]), barWidth, bh, [2, 2, 0, 0]);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(60, 52, 137, 0.5)';
+        ctx.fillStyle = 'rgba(44, 62, 107, 0.55)';
+        ctx.fillRect(x, yPos(data[i]), barWidth, bh);
+        ctx.strokeStyle = 'rgba(44, 62, 107, 0.3)';
         ctx.lineWidth = 0.5;
-        ctx.stroke();
+        ctx.strokeRect(x, yPos(data[i]), barWidth, bh);
       }
     }
 
@@ -271,7 +319,7 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     ctx.fillStyle = '#94a3b8';
     ctx.font = '8px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.textAlign = 'center';
-    for (var i = 0; i < labels.length; i += 2) {
+    for (var i = 0; i < labels.length; i += 4) {
       ctx.fillText(labels[i], xPos(i), pad.top + plotH + 14);
     }
 
@@ -289,15 +337,14 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
       ctx.fillText(v + 'x', pad.left - 4, yPos(v) + 3);
     }
 
-    // Axis labels
+    // Axis label
     ctx.fillStyle = '#64748b';
-    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('g →', pad.left + plotW - 20, pad.top + plotH + 20);
+    ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('b →', pad.left + plotW, pad.top + plotH + 20);
 
-    // Current g marker
-    var curG = parseFloat(gS.value) / 100;
-    var curIdx = Math.round(curG / 0.005);
+    // Current b marker
+    var curIdx = Math.round(b / 0.05);
     var curPE = data[curIdx];
     if (curPE !== null && curPE > 0) {
       ctx.fillStyle = '#d97706';
@@ -307,14 +354,29 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
       ctx.fillStyle = '#854F0B';
       ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
-      var peText = (1 - b) / (r - curG);
-      var lbl = peText > 50 ? '>50x' : peText.toFixed(1) + 'x';
-      ctx.fillText('当前 PE=' + lbl, xPos(curIdx), yPos(curPE) - 10);
+      ctx.fillText('当前 PE=' + curPE.toFixed(1) + 'x', xPos(curIdx), yPos(curPE) - 10);
+    }
+
+    // ROE vs r indicator
+    var indicatorY = pad.top + plotH - 12;
+    ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+    if (roe > r) {
+      ctx.fillStyle = '#15803d';
+      ctx.textAlign = 'left';
+      ctx.fillText('↗ ROE > r：b↑PE↑', pad.left + 4, indicatorY);
+    } else if (Math.abs(roe - r) < 0.002) {
+      ctx.fillStyle = '#185fa5';
+      ctx.textAlign = 'left';
+      ctx.fillText('→ ROE = r：b 不影响 PE', pad.left + 4, indicatorY);
+    } else {
+      ctx.fillStyle = '#c62828';
+      ctx.textAlign = 'left';
+      ctx.fillText('↘ ROE < r：b↑PE↓', pad.left + 4, indicatorY);
     }
   }
 
   rS.addEventListener('input', update);
-  gS.addEventListener('input', update);
+  roeS.addEventListener('input', update);
   bS.addEventListener('input', update);
   window.addEventListener('resize', update);
   update();
