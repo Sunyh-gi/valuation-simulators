@@ -90,7 +90,7 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
 <p class="subtitle">基于戈登增长模型，观察 PE 对 r、g、留存率的敏感度</p>
 
 <div class="formula-card">
-  PE = (1 <span class="sep">−</span> b) <span class="sep">/</span> (r <span class="sep">−</span> g)
+  PE = (1 <span class="sep">−</span> b) <span class="sep">/</span> (r <span class="sep">−</span> g) &emsp;=&emsp; g = b <span class="sep">×</span> ROE
 </div>
 
 <div class="control-grid-3">
@@ -132,7 +132,7 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     <div class="value" id="spreadResult">7.0%</div>
   </div>
   <div class="metric-card">
-    <div class="label">隐含 ROE</div>
+    <div class="label">ROE（g/b）</div>
     <div class="value" id="roeResult">—</div>
   </div>
 </div>
@@ -141,7 +141,7 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
   <canvas id="peChart" height="160"></canvas>
 </div>
 
-<p class="footnote">当 g 接近 r 时，PE 发散（趋近无穷）。右侧折线下降表示 spread ≤ 0.2%，模型失效。ROE = r / (1 − b) 为模型隐含的净资产收益率。</p>
+<p class="footnote">戈登增长模型链：g = b × ROE → PE = (1 − b) / (r − b × ROE)。ROE 越高，可持续增长率 g 越高，PE 越高。当 g 接近 r 时 PE 发散（趋近无穷），模型失效。留存率 b 增大虽然推高 g，但会降低分红率(1−b)，两者对 PE 的影响方向相反。</p>
 
 <script>
 (function() {
@@ -173,8 +173,8 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     document.getElementById('payResult').textContent = ((1 - b) * 100).toFixed(0) + '%';
     document.getElementById('spreadResult').textContent = (spread * 100).toFixed(1) + '%';
 
-    // Implied ROE: from g = b * ROE → ROE = g / b, or from PE inverse: ROE = r / (1 - b)
-    var roe = (1 - b) > 0.001 ? r / (1 - b) : 0;
+    // 隐含 ROE = g / b（可持续增长率公式 g = b × ROE 的反推）
+    var roe = b > 0.001 ? g / b : 0;
     document.getElementById('roeResult').textContent = roe > 0 ? (roe * 100).toFixed(1) + '%' : 'N/A';
 
     var peEl = document.getElementById('peResult');
@@ -205,13 +205,13 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
       peEl.style.color = '#185fa5';
       statusEl.textContent = '合理估值区间';
       badge.textContent = '合理'; badge.className = 'status-badge badge-blue';
-      desc.textContent = 'PE 在 10-25x 之间，处于多数成熟行业的典型估值区间。r − g = ' + (spread * 100).toFixed(1) + '%，安全边际充足。';
+      desc.textContent = 'PE 在 10-25x 之间，处于多数成熟行业的典型估值区间。r − g = ' + (spread * 100).toFixed(1) + '%，ROE = ' + (roe * 100).toFixed(1) + '%（g/b），安全边际充足。';
     } else {
       peEl.textContent = pe.toFixed(1) + 'x';
       peEl.style.color = '#15803d';
       statusEl.textContent = '低估 — 安全边际充足';
       badge.textContent = '低估'; badge.className = 'status-badge badge-green';
-      desc.textContent = 'PE < 10x，市场定价保守。结合 ROE 判断：ROE 高则可能是价值股机会，ROE 低则需警惕价值陷阱。';
+      desc.textContent = 'PE < 10x，市场定价保守。当前 ROE = ' + (roe * 100).toFixed(1) + '%' + (roe > 0.15 ? '，盈利能力稳健，可能是价值股机会。' : '，偏低，需警惕价值陷阱。');
     }
 
     drawChart(r, b);
