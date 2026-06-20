@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 市净率模拟器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #fff; color: #1e293b; padding: 32px; max-width: 840px; margin: 0 auto;
+}
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+.formula-card {
+  background: linear-gradient(135deg, #E8EDF3 0%, #eef2f8 100%);
+  border: 1px solid #CDD6E4; border-radius: 12px; padding: 14px 20px;
+  text-align: center; font-size: 15px; font-weight: 600; color: #2C3E6B;
+  margin-bottom: 16px; line-height: 1.6;
+}
+.formula-card em { font-style: normal; color: #c62828; font-weight: 700; }
+.formula-card .sep { color: #A0B0C8; margin: 0 4px; }
+
+.section-title {
+  font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 10px; margin-top: 20px;
+}
+
+.control-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 18px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 18px 22px;
+}
+.control-grid-3 {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 18px 22px;
+}
+@media (max-width: 640px) {
+  .control-grid-2, .control-grid-3 { grid-template-columns: 1fr; }
+}
+.control-group label {
+  font-size: 12px; color: #64748b; display: block; margin-bottom: 4px; font-weight: 500;
+}
+.control-group label span { color: #1e293b; font-weight: 600; }
+.control-group input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 3px;
+  border-radius: 2px; background: #e2e8f0; outline: none; margin: 4px 0;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #2C3E6B; cursor: pointer; border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(44,62,107,0.3); transition: transform 0.15s;
+}
+.control-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%; background: #2C3E6B;
+  cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(44,62,107,0.3);
+}
+.range-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+
+.pb-hero {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 22px; margin-bottom: 18px; text-align: center;
+}
+.pb-hero .label { font-size: 11px; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 4px; }
+.pb-hero .value { font-size: 56px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; transition: color 0.2s; }
+.pb-hero .desc { font-size: 13px; font-weight: 500; }
+.pb-hero .sub-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+.status-bar {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 12px 16px; margin-bottom: 16px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.status-badge { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-red { background: #fce4ec; color: #c62828; }
+.badge-blue { background: #e6f1fb; color: #185fa5; }
+.status-desc { font-size: 12px; color: #64748b; flex: 1; }
+
+.metric-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.metric-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 12px 14px; text-align: center; flex: 1; min-width: 90px;
+}
+.metric-card .label { font-size: 10px; color: #94a3b8; margin-bottom: 3px; font-weight: 500; letter-spacing: 0.3px; }
+.metric-card .value { font-size: 22px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+
+.chart-box {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 18px; margin-bottom: 16px;
+}
+.chart-box h3 { font-size: 12px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.chart-box canvas { display: block; width: 100%; height: 220px; }
+
+.theo-card {
+  background: linear-gradient(135deg, #fefce8 0%, #fef9e7 100%);
+  border: 1px solid #fde68a; border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 16px;
+}
+.theo-card .theo-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.theo-card .theo-label { font-size: 12px; color: #92400e; }
+.theo-card .theo-value { font-size: 28px; font-weight: 700; color: #92400e; }
+.theo-card .theo-gap { font-size: 12px; color: #92400e; padding: 4px 10px; border-radius: 6px; }
+
+.policy-note {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f1fb 100%);
+  border: 1px solid #b5d4f4; border-radius: 10px;
+  padding: 12px 16px; font-size: 12px; color: #1e4976; margin-bottom: 14px; line-height: 1.5;
+}
+
+.footnote { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h1>PB 市净率模拟器</h1>
+<p class="subtitle">通过市值与净资产的关系理解市净率</p>
+
+<div class="formula-card">
+  PB = 市值 / 净资产
+</div>
+
+<div class="section-title">基础参数</div>
+<div class="control-grid-2">
+  <div class="control-group">
+    <label>总市值（亿元） <span id="mcapVal" style="font-weight:700;color:#1e293b;">2,000</span></label>
+    <input type="range" id="mcapSlider" min="10" max="30000" value="2000" step="10">
+    <div class="range-labels"><span>10 亿</span><span>30,000 亿</span></div>
+  </div>
+  <div class="control-group">
+    <label>净资产（亿元） <span id="equityVal" style="font-weight:700;color:#1e293b;">1,000</span></label>
+    <input type="range" id="equitySlider" min="5" max="15000" value="1000" step="5">
+    <div class="range-labels"><span>5 亿</span><span>15,000 亿</span></div>
+  </div>
+</div>
+
+<div class="pb-hero">
+  <div class="label">市净率（PB）</div>
+  <div class="value" id="pbDisplay">2.00</div>
+  <div class="desc" id="pbStatus">溢价交易 — 市场认可资产价值</div>
+  <div class="sub-desc" id="pbSubDesc">市值 2,000 亿 / 净资产 1,000 亿</div>
+</div>
+
+<div class="status-bar">
+  <span class="status-badge badge-blue" id="statusBadge">溢价</span>
+  <span class="status-desc" id="statusDesc">PB &gt; 1.0，市场溢价认可资产价值。溢价幅度反映资产质量和盈利能力。</span>
+</div>
+
+<div class="metric-row">
+  <div class="metric-card">
+    <div class="label">净资产</div>
+    <div class="value" id="equityMetric">1,000 亿</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">总市值</div>
+    <div class="value" id="mcapMetric">2,000 亿</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">溢价 / 折价率</div>
+    <div class="value" id="premiumMetric">+100%</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">隐含 ROE</div>
+    <div class="value" id="impliedROE">12.0%</div>
+  </div>
+</div>
+
+<div class="section-title">PB-ROE 理论估值模型</div>
+<div class="control-grid-3">
+  <div class="control-group">
+    <label>ROE（净资产收益率） <span id="roeVal">12%</span></label>
+    <input type="range" id="roeSlider" min="2" max="40" value="12" step="0.5">
+    <div class="range-labels"><span>2%</span><span>40%</span></div>
+  </div>
+  <div class="control-group">
+    <label>权益成本 r <span id="rVal">10%</span></label>
+    <input type="range" id="rSlider" min="6" max="18" value="10" step="0.5">
+    <div class="range-labels"><span>6%</span><span>18%</span></div>
+  </div>
+  <div class="control-group">
+    <label>永续增长率 g <span id="gVal">3%</span></label>
+    <input type="range" id="gSlider" min="0" max="8" value="3" step="0.5">
+    <div class="range-labels"><span>0%</span><span>8%</span></div>
+  </div>
+</div>
+
+<div class="theo-card" id="theoCard">
+  <div class="theo-row">
+    <span class="theo-label">理论 PB（戈登模型推导）</span>
+    <span class="theo-value" id="theoPB">1.29</span>
+    <span class="theo-gap" id="theoGap" style="background:#fef3c7;color:#92400e;">当前 PB 2.00 高于理论值</span>
+  </div>
+</div>
+
+<div class="chart-box">
+  <h3>PB-ROE 关系曲线</h3>
+  <canvas id="pbChart" height="220"></canvas>
+</div>
+
+<div class="policy-note" id="policyNote">
+  PB &gt; 1 说明市场认为公司资产的价值高于账面记载。溢价幅度取决于资产的盈利能力（ROE）：高 ROE 的公司理应享有更高 PB。
+  当前 PB 低于理论 PB，可能被低估；高于理论 PB，需确认增长预期是否合理。
+</div>
+
+<p class="footnote">
+  PB = 总市值 / 净资产（归属于母公司股东的权益）。PB &lt; 1 为"破净"，常用于银行、保险、地产等资产密集型行业估值。
+  理论 PB 基于戈登增长模型推导：PB = (ROE - g) / (r - g)，其中 r 为权益成本，g 为永续增长率，ROE &gt; g 时有效。
+  注意：轻资产公司（互联网、软件）PB 参考价值有限。不同行业 PB 不可直接比较。
+</p>
+
+<script>
+(function() {
+  var mcapS = document.getElementById('mcapSlider');
+  var equityS = document.getElementById('equitySlider');
+  var roeS = document.getElementById('roeSlider');
+  var rS = document.getElementById('rSlider');
+  var gS = document.getElementById('gSlider');
+  var canvas = document.getElementById('pbChart');
+  var ctx = canvas.getContext('2d');
+
+  function fmtNum(n) {
+    if (n >= 10000) return (n / 10000).toFixed(2) + ' 万亿';
+    return n.toLocaleString('zh-CN');
+  }
+
+  function getDPI() {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    return { w: rect.width, h: rect.height };
+  }
+
+  function update() {
+    var mcap = parseFloat(mcapS.value);       // 亿元
+    var equity = parseFloat(equityS.value);    // 亿元
+    var roePct = parseFloat(roeS.value);
+    var rPct = parseFloat(rS.value);
+    var gPct = parseFloat(gS.value);
+
+    var roe = roePct / 100;
+    var r = rPct / 100;
+    var g = gPct / 100;
+
+    // PB = 市值 / 净资产
+    var pb = equity > 0 ? (mcap / equity) : 0;
+    var premium = ((pb - 1) * 100);
+    var premiumStr = premium >= 0 ? '+' + premium.toFixed(1) + '%' : premium.toFixed(1) + '%';
+
+    // Implied ROE: market's expectation based on current PB
+    var implRoe = (r - g) * pb + g;
+    if (!isFinite(implRoe) || implRoe < 0) implRoe = 0;
+
+    // Theoretical PB from Gordon Growth model
+    var theoPB = 0;
+    var theoValid = false;
+    if (roe > g && r > g && r > 0) {
+      theoPB = (roe - g) / (r - g);
+      theoValid = true;
+    }
+
+    // Update labels
+    document.getElementById('mcapVal').textContent = fmtNum(mcap);
+    document.getElementById('equityVal').textContent = fmtNum(equity);
+    document.getElementById('roeVal').textContent = roePct + '%';
+    document.getElementById('rVal').textContent = rPct + '%';
+    document.getElementById('gVal').textContent = gPct + '%';
+
+    // PB hero display
+    var pbDisp = document.getElementById('pbDisplay');
+    pbDisp.textContent = pb.toFixed(2);
+
+    var pbStatus = document.getElementById('pbStatus');
+    var badge = document.getElementById('statusBadge');
+    var desc = document.getElementById('statusDesc');
+    var note = document.getElementById('policyNote');
+    var pbSubDesc = document.getElementById('pbSubDesc');
+    pbSubDesc.textContent = '市值 ' + fmtNum(mcap) + ' / 净资产 ' + fmtNum(equity);
+
+    if (pb < 0.5) {
+      pbDisp.style.color = '#c62828';
+      pbStatus.textContent = '深度破净 — 资产价值受严重怀疑';
+      badge.textContent = '深度破净'; badge.className = 'status-badge badge-red';
+      desc.textContent = 'PB < 0.5，市场认为公司资产质量堪忧。需排查资产是否真实存在、有无隐性坏账、行业是否被颠覆。';
+      note.innerHTML = 'PB 低于 0.5 属于深度破净，常见于银行股（资产质量担忧）、地产股（存货减值风险）、周期底部公司。' +
+        '<br><b>关键问题</b>：资产质量是否可靠？减值计提是否充分？盈利能力能否恢复？';
+    } else if (pb < 0.8) {
+      pbDisp.style.color = '#d97706';
+      pbStatus.textContent = '轻度破净 — 边际安全';
+      badge.textContent = '破净'; badge.className = 'status-badge badge-amber';
+      desc.textContent = 'PB 在 0.5-0.8 之间，资产被折价出售。如果 ROE 稳定且资产质量可靠，可能是价值洼地。';
+      note.innerHTML = 'PB 在 0.5-0.8 之间，资产被折价定价。如果公司 ROE 稳定（>10%）、资产减值的可能性小，' +
+        '这可能是一个机会。建议对比同业 PB 并观察历史 PB 区间。';
+    } else if (pb < 1.2) {
+      pbDisp.style.color = '#185fa5';
+      pbStatus.textContent = '接近净值 — 价格与账面价值相当';
+      badge.textContent = '平价'; badge.className = 'status-badge badge-blue';
+      badge.style.background = '#e6f1fb'; badge.style.color = '#185fa5';
+      desc.textContent = 'PB 在 0.8-1.2 之间，市场对资产的定价接近账面价值。';
+      note.innerHTML = 'PB 接近 1.0，市场对资产的定价基本反映账面价值。此时需要关注 ROE 的趋势方向：' +
+        'ROE 向上则 PB 有扩张空间，ROE 向下则可能破净。';
+    } else if (pb < 2.5) {
+      pbDisp.style.color = '#15803d';
+      pbStatus.textContent = '溢价交易 — 市场认可资产价值';
+      badge.textContent = '溢价'; badge.className = 'status-badge badge-green';
+      desc.textContent = 'PB 在 1.2-2.5 之间，市场溢价认可资产价值。溢价反映资产的盈利能力和品牌价值。';
+      note.innerHTML = 'PB 处于溢价区间，说明市场认为公司资产能产生超额回报。溢价幅度与 ROE 正相关。' +
+        '<br>可与理论 PB 对比：当前 PB 明显低于理论值，可能是低估信号；高于理论值，需确认增长预期。';
+    } else {
+      pbDisp.style.color = '#15803d';
+      pbStatus.textContent = '高度溢价 — 品牌/技术溢价显著';
+      badge.textContent = '高度溢价'; badge.className = 'status-badge badge-green';
+      desc.textContent = 'PB > 2.5，市场为资产支付了显著溢价。通常对应品牌消费、技术垄断等高 ROE 公司。';
+      note.innerHTML = 'PB > 2.5，市场为资产支付了显著溢价。这对高 ROE 公司可能是合理的（如茅台 PB 通常在 8-12x），' +
+        '但对低 ROE 公司则是危险信号。始终要将 PB 和 ROE 放在一起看。';
+    }
+
+    // Metrics
+    document.getElementById('equityMetric').textContent = fmtNum(equity);
+    document.getElementById('mcapMetric').textContent = fmtNum(mcap);
+    document.getElementById('premiumMetric').textContent = premiumStr;
+    document.getElementById('impliedROE').textContent = (implRoe * 100).toFixed(1) + '%';
+
+    // Theoretical PB comparison
+    var theoDisp = document.getElementById('theoPB');
+    var theoGap = document.getElementById('theoGap');
+    if (theoValid) {
+      theoDisp.textContent = theoPB.toFixed(2);
+      var gapPct = theoPB > 0 ? ((pb / theoPB) - 1) * 100 : 0;
+      if (Math.abs(gapPct) < 10) {
+        theoGap.textContent = '当前 PB 接近理论值（差 ' + (gapPct >= 0 ? '+' : '') + gapPct.toFixed(1) + '%）';
+        theoGap.style.background = '#dcfce7'; theoGap.style.color = '#15803d';
+      } else if (gapPct > 0) {
+        theoGap.textContent = '当前 PB 高于理论值 ' + gapPct.toFixed(1) + '%';
+        theoGap.style.background = '#fef3c7'; theoGap.style.color = '#92400e';
+      } else {
+        theoGap.textContent = '当前 PB 低于理论值 ' + Math.abs(gapPct).toFixed(1) + '%';
+        theoGap.style.background = '#e6f1fb'; theoGap.style.color = '#185fa5';
+      }
+    } else {
+      theoDisp.textContent = '—';
+      theoGap.textContent = '需满足 ROE > g 且 r > g';
+      theoGap.style.background = '#f1f5f9'; theoGap.style.color = '#64748b';
+    }
+
+    drawChart(roePct, rPct, gPct, pb);
+  }
+
+  function drawChart(roePct, rPct, gPct, currentPB) {
+    var dim = getDPI();
+    var w = dim.w, h = dim.h;
+    var pad = { top: 20, bottom: 28, left: 48, right: 20 };
+    var plotW = w - pad.left - pad.right;
+    var plotH = h - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = '#fafbfc';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = '#1e293b';
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('不同 ROE 水平下的理论 PB 值', w/2, 14);
+
+    var xMin = 2, xMax = 40;
+    var yMin = 0, yMax = 8;
+
+    function xPos(val) { return pad.left + (val - xMin) / (xMax - xMin) * plotW; }
+    function yPos(val) { return pad.top + plotH - (val - yMin) / (yMax - yMin) * plotH; }
+
+    // Grid
+    ctx.strokeStyle = '#f1f5f9';
+    ctx.lineWidth = 0.5;
+    for (var y = 0; y <= yMax; y += 1) {
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yPos(y));
+      ctx.lineTo(pad.left + plotW, yPos(y));
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(y.toFixed(1) + 'x', pad.left - 6, yPos(y) + 4);
+    }
+
+    for (var x = 5; x <= 40; x += 5) {
+      ctx.beginPath();
+      ctx.moveTo(xPos(x), pad.top);
+      ctx.lineTo(xPos(x), pad.top + plotH);
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(x + '%', xPos(x), pad.top + plotH + 16);
+    }
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ROE →', pad.left + plotW/2, pad.top + plotH + 26);
+
+    // PB=1 reference line
+    ctx.strokeStyle = '#fecaca';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, yPos(1));
+    ctx.lineTo(pad.left + plotW, yPos(1));
+    ctx.stroke();
+    ctx.fillStyle = '#ef4444';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('PB=1（破净线）', pad.left + plotW - 72, yPos(1) - 4);
+    ctx.setLineDash([]);
+
+    // PB-ROE theoretical curve
+    ctx.strokeStyle = '#2C3E6B';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    var started = false;
+    for (var rv = 2; rv <= 40; rv += 0.5) {
+      var rdeci = rv / 100;
+      var rdec = rPct / 100;
+      var gdec = gPct / 100;
+      if (rdeci > gdec && rdec > gdec) {
+        var tv = (rdeci - gdec) / (rdec - gdec);
+        if (tv >= 0 && tv <= yMax) {
+          if (!started) { ctx.moveTo(xPos(rv), yPos(tv)); started = true; }
+          else { ctx.lineTo(xPos(rv), yPos(tv)); }
+        }
+      }
+    }
+    ctx.stroke();
+
+    // Curve label
+    ctx.fillStyle = '#2C3E6B';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('理论 PB 曲线 (r=' + rPct + '%, g=' + gPct + '%)', pad.left + 10, pad.top + 14);
+
+    // Current ROE marker on curve
+    var curX = xPos(roePct);
+    var roeDec = roePct / 100;
+    var rDec = rPct / 100;
+    var gDec = gPct / 100;
+    var theoY = (roeDec > gDec && rDec > gDec) ? (roeDec - gDec) / (rDec - gDec) : -1;
+
+    if (theoY >= 0 && theoY <= yMax) {
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.arc(curX, yPos(theoY), 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#854F0B';
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('理论 PB=' + theoY.toFixed(2), curX, yPos(theoY) - 12);
+    }
+
+    // Current PB horizontal line
+    if (currentPB <= yMax) {
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yPos(currentPB));
+      ctx.lineTo(pad.left + plotW, yPos(currentPB));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#d97706';
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('当前 PB=' + currentPB.toFixed(2), pad.left + plotW, yPos(currentPB) - 4);
+    }
+  }
+
+  mcapS.addEventListener('input', update);
+  equityS.addEventListener('input', update);
+  roeS.addEventListener('input', update);
+  rS.addEventListener('input', update);
+  gS.addEventListener('input', update);
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+</body>
+</html>
