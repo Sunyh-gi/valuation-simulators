@@ -10,26 +10,29 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
   background:#fff;color:#1e293b;padding:32px;max-width:800px;margin:0 auto
 }
-h1{font-size:22px;font-weight:600;margin-bottom:6px}
-.subtitle{font-size:13px;color:#64748b;margin-bottom:14px}
+h1{font-size:22px;font-weight:600;margin-bottom:5px}
+.subtitle{font-size:13px;color:#64748b;margin-bottom:16px}
+
 .f-card{
   background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
   border-radius:12px;padding:12px 16px;text-align:center;font-size:14px;font-weight:600;
-  color:#2C3E6B;margin-bottom:14px;line-height:1.6
+  color:#2C3E6B;margin-bottom:16px;line-height:1.6
 }
-.f-card em{font-style:normal;color:#e11d48;font-weight:700}
-.cg2{
-  display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px;
-  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 18px
+
+.ctrl{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 20px
 }
-@media(max-width:600px){.cg2{grid-template-columns:1fr}}
+@media(max-width:600px){.ctrl{grid-template-columns:1fr}}
+.cg{margin-bottom:14px}
+.cg:last-child{margin-bottom:0}
 .cg label{
-  font-size:12px;color:#64748b;display:flex;justify-content:space-between;margin-bottom:3px;font-weight:500
+  font-size:12px;color:#64748b;display:flex;justify-content:space-between;margin-bottom:4px;font-weight:500
 }
 .cg label span{color:#1e293b;font-weight:600}
 .cg input[type=range]{
   -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
-  background:#e2e8f0;outline:none;margin:3px 0
+  background:#e2e8f0;outline:none;margin:4px 0
 }
 .cg input[type=range]::-webkit-slider-thumb{
   -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#2C3E6B;
@@ -39,15 +42,17 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px}
 .cg input[type=range]::-moz-range-thumb{
   width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;border:2px solid #fff
 }
+
 .hero{
-  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:14px;text-align:center
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:16px;text-align:center
 }
-.hero .lbl{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px;margin-bottom:2px}
-.hero .val{font-size:48px;font-weight:700;line-height:1.1;margin-bottom:2px;transition:color .2s}
-.hero .desc{font-size:13px;font-weight:500}
-.hero .sub{font-size:12px;color:#64748b;font-weight:400;margin-top:2px}
+.hero .lbl{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px;margin-bottom:4px}
+.hero .val{font-size:52px;font-weight:700;line-height:1.1;margin-bottom:4px;transition:color .2s}
+.hero .desc{font-size:14px;font-weight:500}
+.hero .sub{font-size:12px;color:#64748b;margin-top:3px}
+
 .sbar{
-  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px;margin-bottom:12px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:14px;
   display:flex;flex-wrap:wrap;align-items:center;gap:8px
 }
 .sb{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
@@ -56,18 +61,36 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px}
 .r{background:#fce4ec;color:#c62828}
 .bl{background:#e6f1fb;color:#185fa5}
 .sd{font-size:12px;color:#64748b;flex:1}
-.mr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+.mr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .mc{
-  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;
-  text-align:center;flex:1;min-width:70px
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+  padding:10px 12px;text-align:center;flex:1;min-width:80px
 }
-.mc .lbl{font-size:10px;color:#94a3b8;margin-bottom:2px;font-weight:500;letter-spacing:.3px}
-.mc .val{font-size:20px;font-weight:600;color:#1e293b;line-height:1.3}
+.mc .lbl{font-size:10px;color:#94a3b8;margin-bottom:3px;font-weight:500;letter-spacing:.3px}
+.mc .val{font-size:22px;font-weight:600;color:#1e293b;line-height:1.3}
+
 .cross{
   background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
-  border-radius:12px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#1e293b;line-height:1.5
+  border-radius:12px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#1e293b;line-height:1.6
 }
 .cross strong{color:#2C3E6B}
+
+.exp-box{
+  background:#fff;border:1px solid #e2e8f0;border-radius:12px;
+  padding:12px 16px;margin-bottom:14px
+}
+.exp-box .t{font-size:12px;font-weight:600;color:#1e293b;margin-bottom:8px}
+.exp-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.exp-c{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px;text-align:center}
+.exp-c .xp{font-size:10px;color:#64748b;margin-bottom:2px}
+.exp-c .pe-l{font-size:13px;font-weight:500}
+.exp-c .ev-l{font-size:11px;color:#2C3E6B;margin-top:1px}
+.exp-nt{
+  background:#f0f4ff;border:1px solid #c7d2fe;border-radius:8px;
+  padding:8px 12px;margin-top:8px;font-size:11px;color:#1e293b;line-height:1.5
+}
+
 .fn{font-size:11px;color:#94a3b8;line-height:1.5}
 .fn em{font-style:normal;color:#c62828}
 </style>
@@ -75,25 +98,25 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px}
 <body>
 
 <h1>EV / EBITDA 估值分析器</h1>
-<p class="subtitle">花 EV 买下整家公司, 需要多少年 EBITDA 才能回本?</p>
+<p class="subtitle">如果花 EV 买下整家公司，需要多少年 EBITDA 才能回本?</p>
 
-<div class="f-card">(市值 <em>+</em> 负债 <em>-</em> 现金) / EBITDA</div>
+<div class="f-card">(市值 + 负债 - 现金) / EBITDA</div>
 
-<div class="cg2">
+<div class="ctrl">
   <div class="cg">
     <label>市值 (Market Cap) <span id="mcV">1,000</span></label>
     <input type="range" id="mc" min="200" max="3000" value="1000" step="10">
-    <label>总负债 (Debt) <span id="debtV">300</span></label>
+    <label style="margin-top:10px">总负债 (Debt) <span id="debtV">300</span></label>
     <input type="range" id="debt" min="0" max="2500" value="300" step="10">
-    <label>现金 (Cash) <span id="cashV">150</span></label>
+    <label style="margin-top:10px">现金 (Cash) <span id="cashV">150</span></label>
     <input type="range" id="cash" min="0" max="1500" value="150" step="10">
   </div>
   <div class="cg">
     <label>EBITDA <span id="ebV">120</span></label>
     <input type="range" id="eb" min="10" max="500" value="120" step="5">
-    <label>D&A占比(资产轻重) <span id="daV">30%</span></label>
+    <label style="margin-top:10px">D&A 占比 (衡量资产轻重) <span id="daV">30%</span></label>
     <input type="range" id="da" min="5" max="60" value="30" step="1">
-    <label>净利率(Net Margin) <span id="nmV">8%</span></label>
+    <label style="margin-top:10px">净利率 (Net Margin) <span id="nmV">8%</span></label>
     <input type="range" id="nm" min="1" max="30" value="8" step="1">
   </div>
 </div>
@@ -102,11 +125,11 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px}
   <div class="lbl">EV / EBITDA</div>
   <div class="val" id="heroVal">9.8x</div>
   <div class="desc" id="heroDesc">消费/工业合理区间</div>
-  <div class="sub">≈ <span id="payback">9.8</span> 年回本 · EV=<span id="evDisp">1,170</span></div>
+  <div class="sub">≈ <span id="payback">9.8</span> 年 EBITDA 回本 &nbsp;·&nbsp; EV = <span id="evDisp">1,170</span></div>
 </div>
 
 <div class="sbar">
-  <span class="sb" id="sb">适中</span>
+  <span class="sb bl" id="sb">适中</span>
   <span class="sd" id="sd">处于消费/工业合理区间。拖动滑块观察变化。</span>
 </div>
 
@@ -117,43 +140,80 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px}
   <div class="mc"><div class="lbl">回本年限</div><div class="val" id="pbMc">9.8</div></div>
 </div>
 
+<div class="exp-box">
+  <div class="t">同样经营能力，不同资本结构</div>
+  <div class="exp-g">
+    <div class="exp-c">
+      <div class="xp">当前</div>
+      <div class="pe-l" id="e1pe">PE 12.5x</div>
+      <div class="ev-l" id="e1ev">EV/EBITDA 9.8x</div>
+    </div>
+    <div class="exp-c">
+      <div class="xp">负债+50%</div>
+      <div class="pe-l" id="e2pe" style="color:#c62828">PE 8.7x</div>
+      <div class="ev-l" id="e2ev">EV/EBITDA 12.1x</div>
+    </div>
+    <div class="exp-c">
+      <div class="xp">负债-50%</div>
+      <div class="pe-l" id="e3pe" style="color:#15803d">PE 16.7x</div>
+      <div class="ev-l" id="e3ev">EV/EBITDA 8.0x</div>
+    </div>
+  </div>
+  <div class="exp-nt">
+    <strong>关键:</strong> EBITDA 相同，负债不同让 PE 从 <span id="peLo">8.7x</span> 到 <span id="peHi">16.7x</span> 大幅波动。EV/EBITDA 排除了资本结构干扰，更适合跨公司比较。
+  </div>
+</div>
+
 <div class="cross">
-  <div><strong>行业参考</strong> 消费8-12x 科技15-25x 工业7-11x 医疗12-18x 能源4-8x</div>
+  <strong>行业参考:</strong> 消费 8-12x &nbsp;|&nbsp; 科技 15-25x &nbsp;|&nbsp; 工业 7-11x &nbsp;|&nbsp; 医疗 12-18x &nbsp;|&nbsp; 能源 4-8x &nbsp;|&nbsp; 当前 <strong id="curRef">9.8x</strong>
 </div>
 
 <p class="fn">
-  EBITDA = 营业利润 + 利息 + D&amp;A (推荐起点). 或用逆推: 净利润+所得税+利息+D&amp;A+(营业外支出-营业外收入).<br>
-  <em>&#x26A0;陷阱</em> 不反映Capex · 忽略营运资本 · 可被操纵 · 金融业无效 · 本工具仅供参考
+  EBITDA 推荐路径: 营业利润 + 利息费用 + D&A。反推: 净利润+所得税+利息+D&A+(营业外支出-营业外收入)。<br>
+  <em>&#x26A0; 陷阱:</em> 不反映 Capex · 忽略营运资本 · 可被操纵 · 金融行业无效 · 本工具仅供参考学习不构成投资建议
 </p>
 
 <script>
 (function(){
-function fmt(n){return Math.round(n)}
+function f(n){return Math.round(n)}
 function f1(n){return n.toFixed(1)}
-var e={mc:document.getElementById('mc'),debt:document.getElementById('debt'),cash:document.getElementById('cash'),eb:document.getElementById('eb'),da:document.getElementById('da'),nm:document.getElementById('nm')}
+var el={mc:document.getElementById('mc'),debt:document.getElementById('debt'),cash:document.getElementById('cash'),eb:document.getElementById('eb'),da:document.getElementById('da'),nm:document.getElementById('nm')}
 function upd(){
-var mc=parseFloat(e.mc.value),debt=parseFloat(e.debt.value),cash=parseFloat(e.cash.value),ebitda=parseFloat(e.eb.value),daR=parseFloat(e.da.value),nm=parseFloat(e.nm.value)
-document.getElementById('mcV').textContent=fmt(mc)
-document.getElementById('debtV').textContent=fmt(debt)
-document.getElementById('cashV').textContent=fmt(cash)
-document.getElementById('ebV').textContent=fmt(ebitda)
+var mc=parseFloat(el.mc.value),debt=parseFloat(el.debt.value),cash=parseFloat(el.cash.value),ebitda=parseFloat(el.eb.value),daR=parseFloat(el.da.value),nm=parseFloat(el.nm.value)
+document.getElementById('mcV').textContent=f(mc)
+document.getElementById('debtV').textContent=f(debt)
+document.getElementById('cashV').textContent=f(cash)
+document.getElementById('ebV').textContent=f(ebitda)
 document.getElementById('daV').textContent=daR+'%'
 document.getElementById('nmV').textContent=nm+'%'
 var ev=mc+debt-cash,m=ebitda>0?ev/ebitda:0,da=ebitda*daR/100,ebit=ebitda-da,ni=ebit*0.75,rev=nm>0?ni/(nm/100):0
-document.getElementById('evDisp').textContent=fmt(ev)
-document.getElementById('evMc').textContent=fmt(ev)
-document.getElementById('ebMc').textContent=fmt(ebitda)
-document.getElementById('ebitMc').textContent=fmt(ebit)
+document.getElementById('evDisp').textContent=f(ev)
+document.getElementById('evMc').textContent=f(ev)
+document.getElementById('ebMc').textContent=f(ebitda)
+document.getElementById('ebitMc').textContent=f(ebit)
 document.getElementById('heroVal').textContent=m>0?f1(m)+'x':'N/A'
 document.getElementById('payback').textContent=m>0?f1(m):'N/A'
 document.getElementById('pbMc').textContent=m>0?f1(m):'N/A'
+document.getElementById('curRef').textContent=m>0?f1(m)+'x':'N/A'
 var sb=document.getElementById('sb'),sd=document.getElementById('sd'),hd=document.getElementById('heroDesc')
-if(m<6){sb.textContent='偏低';sb.className='sb g';sd.textContent='低于行业多数区间。可能低估,也可能价值陷阱。';hd.textContent='低于行业均值'}
+if(m<6){sb.textContent='偏低';sb.className='sb g';sd.textContent='低于多数行业区间。可能低估,也可能存在结构性风险。';hd.textContent='低于行业均值'}
 else if(m<12){sb.textContent='适中';sb.className='sb bl';sd.textContent='处于消费/工业合理区间。拖动滑块观察变化。';hd.textContent='消费/工业合理区间'}
-else if(m<20){sb.textContent='偏高';sb.className='sb y';sd.textContent='与科技/医疗匹配,需高增长支撑。';hd.textContent='偏高,需增长支撑'}
-else{sb.textContent='高估';sb.className='sb r';sd.textContent='需要极具说服力的增长故事。建议DCF交叉验证。';hd.textContent='显著高于行业均值'}
+else if(m<20){sb.textContent='偏高';sb.className='sb y';sd.textContent='与科技/医疗行业匹配,需高增长支撑。';hd.textContent='偏高,需增长支撑'}
+else{sb.textContent='高估';sb.className='sb r';sd.textContent='显著高于行业均值,建议用DCF交叉验证。';hd.textContent='显著高于行业均值'}
+// experiment
+var dh=debt*1.5,ch=cash*0.5,dl=debt*0.5,cl=cash*1.5,evH=mc+dh-ch,evL=mc+dl-cl
+function cp(mv,dv,cv){var it=Math.max(0,dv*0.04-cv*0.02),pt=ebit-it,n=pt*0.75;return n>0?mv/n:0}
+var pC=cp(mc,debt,cash),pH=cp(mc,dh,ch),pL=cp(mc,dl,cl)
+document.getElementById('e1pe').textContent=pC>0?'PE '+f1(pC)+'x':'PE N/A'
+document.getElementById('e1ev').textContent='EV/EBITDA '+f1(m)+'x'
+document.getElementById('e2pe').textContent=pH>0?'PE '+f1(pH)+'x':'PE N/A'
+document.getElementById('e2ev').textContent='EV/EBITDA '+f1(evH/ebitda)+'x'
+document.getElementById('e3pe').textContent=pL>0?'PE '+f1(pL)+'x':'PE N/A'
+document.getElementById('e3ev').textContent='EV/EBITDA '+f1(evL/ebitda)+'x'
+document.getElementById('peLo').textContent=f1(Math.min(pC||999,pH||999,pL||999))+'x'
+document.getElementById('peHi').textContent=f1(Math.max(pC||0,pH||0,pL||0))+'x'
 }
-for(var k in e)e[k].addEventListener('input',upd);upd()
+for(var k in el)el[k].addEventListener('input',upd);upd()
 })()
 </script>
 </body>
