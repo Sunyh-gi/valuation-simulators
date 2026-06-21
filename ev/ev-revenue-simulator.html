@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV/Revenue 营收倍数分析器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#fff;color:#1e293b;padding:28px;max-width:800px;margin:0 auto
+}
+h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.subtitle{font-size:13px;color:#64748b;margin-bottom:14px}
+
+.f-card{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 16px;text-align:center;font-size:14px;font-weight:600;
+  color:#2C3E6B;margin-bottom:14px;line-height:1.6
+}
+.f-card em{font-style:normal;color:#e11d48;font-weight:700}
+
+.ctrl{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 18px
+}
+@media(max-width:600px){.ctrl{grid-template-columns:1fr}}
+.cg{margin-bottom:12px}
+.cg:last-child{margin-bottom:0}
+.cg label{
+  font-size:12px;color:#64748b;display:flex;justify-content:space-between;margin-bottom:3px;font-weight:500
+}
+.cg label span{color:#1e293b;font-weight:600}
+.cg input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
+  background:#e2e8f0;outline:none;margin:3px 0
+}
+.cg input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#2C3E6B;
+  cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(44,62,107,.3);transition:transform .15s
+}
+.cg input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.cg input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;border:2px solid #fff
+}
+
+.hero{
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:14px;text-align:center
+}
+.hero .lbl{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px;margin-bottom:3px}
+.hero .val{font-size:48px;font-weight:700;line-height:1.1;margin-bottom:3px;transition:color .2s}
+.hero .desc{font-size:13px;font-weight:500}
+.hero .sub{font-size:12px;color:#64748b;margin-top:2px}
+
+.tri-box{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1e293b;line-height:1.6
+}
+.tri-box strong{color:#2C3E6B}
+
+.sbar{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px;margin-bottom:14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px
+}
+.sb{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.g{background:#dcfce7;color:#15803d}
+.y{background:#fef3c7;color:#92400e}
+.r{background:#fce4ec;color:#c62828}
+.bl{background:#e6f1fb;color:#185fa5}
+.sd{font-size:12px;color:#64748b;flex:1}
+
+.mr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.mc{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+  padding:8px 10px;text-align:center;flex:1;min-width:70px
+}
+.mc .lbl{font-size:10px;color:#94a3b8;margin-bottom:2px;font-weight:500;letter-spacing:.3px}
+.mc .val{font-size:20px;font-weight:600;color:#1e293b;line-height:1.3}
+
+.ref-box{
+  background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;margin-bottom:14px
+}
+.ref-box .t{font-size:12px;font-weight:600;color:#1e293b;margin-bottom:6px}
+.ref-table{font-size:11px;color:#475569;line-height:1.8}
+.ref-table .rr{display:flex;justify-content:space-between;padding:1px 0}
+
+.fn{font-size:11px;color:#94a3b8;line-height:1.5}
+.fn em{font-style:normal;color:#c62828}
+</style>
+</head>
+<body>
+
+<h1>EV / Revenue 营收倍数分析器</h1>
+<p class="subtitle">每产生 1 元营收，市场给这家公司的企业价值定价多少?</p>
+
+<div class="f-card">EV/Revenue <span style="color:#94a3b8;font-weight:400">=</span> EV/EBITDA <em>&times;</em> EBITDA利润率</div>
+
+<div class="ctrl">
+  <div class="cg">
+    <label>市值 (Market Cap) <span id="mcV">1,000</span></label>
+    <input type="range" id="mc" min="200" max="3000" value="1000" step="10">
+    <label style="margin-top:8px">总负债 (Debt) <span id="debtV">300</span></label>
+    <input type="range" id="debt" min="0" max="2500" value="300" step="10">
+    <label style="margin-top:8px">现金 (Cash) <span id="cashV">150</span></label>
+    <input type="range" id="cash" min="0" max="1500" value="150" step="10">
+  </div>
+  <div class="cg">
+    <label>营业收入 (Revenue) <span id="revV">500</span></label>
+    <input type="range" id="rev" min="50" max="3000" value="500" step="10">
+    <label style="margin-top:8px">EBITDA <span id="ebV">120</span></label>
+    <input type="range" id="eb" min="10" max="500" value="120" step="5">
+    <label style="margin-top:8px">净利润 (Net Income) <span id="niV">50</span></label>
+    <input type="range" id="ni" min="0" max="300" value="50" step="5">
+  </div>
+</div>
+
+<div class="hero">
+  <div class="lbl">EV / Revenue</div>
+  <div class="val" id="heroVal">2.3x</div>
+  <div class="desc" id="heroDesc">每 1 元营收对应 2.3 元企业价值</div>
+  <div class="sub">EV = <span id="evDisp">1,150</span> &nbsp;·&nbsp; 营收 = <span id="revDisp">500</span></div>
+</div>
+
+<div class="tri-box" id="triBox">
+  <strong>拆解:</strong> EV/Revenue(<span id="tRev">2.3x</span>) = EV/EBITDA(<span id="tEbitda">9.6x</span>) &times; EBITDA利润率(<span id="tMargin">24%</span>)
+  &nbsp;|&nbsp; 隐含净利率: <strong id="tNi">10%</strong>
+  &nbsp;|&nbsp; 对比 PE: <strong id="tPe">20.0x</strong>
+</div>
+
+<div class="sbar">
+  <span class="sb bl" id="sb">适中</span>
+  <span class="sd" id="sd">处于消费/工业合理区间。营收倍数必须配合利润率一起判断。</span>
+</div>
+
+<div class="mr">
+  <div class="mc"><div class="lbl">企业价值</div><div class="val" id="evMc">1,150</div></div>
+  <div class="mc"><div class="lbl">营收</div><div class="val" id="revMc">500</div></div>
+  <div class="mc"><div class="lbl">EBITDA利润率</div><div class="val" id="emMc">24%</div></div>
+  <div class="mc"><div class="lbl">净利润率</div><div class="val" id="nmMc">10%</div></div>
+</div>
+
+<div class="ref-box">
+  <div class="t">行业参考 (EV/Revenue)</div>
+  <div class="ref-table">
+    <div class="rr"><span>软件/SaaS (高毛利 80%+)</span><span style="font-weight:500;color:#2C3E6B;">5-15x</span></div>
+    <div class="rr"><span>互联网平台 (高毛利 60%+)</span><span style="font-weight:500;color:#2C3E6B;">3-8x</span></div>
+    <div class="rr"><span>消费品牌 (中毛利 30-50%)</span><span style="font-weight:500;color:#2C3E6B;">1-4x</span></div>
+    <div class="rr"><span>零售/批发 (低毛利 10-20%)</span><span style="font-weight:500;color:#2C3E6B;">0.3-1x</span></div>
+    <div class="rr" style="border-bottom:none;"><span>制造/工业 (低毛利 10-25%)</span><span style="font-weight:500;color:#2C3E6B;">0.5-1.5x</span></div>
+  </div>
+</div>
+
+<p class="fn">
+  EV/Revenue 对亏损公司是唯一可用的倍数。但必须配合利润率解读——高倍数本身不贵, 高倍数+低利润率才贵。<br>
+  <em>&#x26A0; 关键:</em> EV/Revenue &times; 净利润率 = 隐含 PE。检查市场对这家公司未来净利率的预期是否合理。本工具仅供参考。
+</p>
+
+<script>
+(function(){
+function f(n){return Math.round(n)}
+function f1(n){return n.toFixed(1)}
+var el={mc:document.getElementById('mc'),debt:document.getElementById('debt'),cash:document.getElementById('cash'),rev:document.getElementById('rev'),eb:document.getElementById('eb'),ni:document.getElementById('ni')}
+function upd(){
+var mc=parseFloat(el.mc.value),debt=parseFloat(el.debt.value),cash=parseFloat(el.cash.value),rev=parseFloat(el.rev.value),ebitda=parseFloat(el.eb.value),ni=parseFloat(el.ni.value)
+document.getElementById('mcV').textContent=f(mc)
+document.getElementById('debtV').textContent=f(debt)
+document.getElementById('cashV').textContent=f(cash)
+document.getElementById('revV').textContent=f(rev)
+document.getElementById('ebV').textContent=f(ebitda)
+document.getElementById('niV').textContent=f(ni)
+var ev=mc+debt-cash,m=ev/rev,em=rev>0?ebitda/rev:0,nm=rev>0?ni/rev:0,ebM=ebitda>0?ev/ebitda:0,pe=ni>0?mc/ni:0
+document.getElementById('evDisp').textContent=f(ev)
+document.getElementById('revDisp').textContent=f(rev)
+document.getElementById('evMc').textContent=f(ev)
+document.getElementById('revMc').textContent=f(rev)
+document.getElementById('emMc').textContent=em>0?f1(em*100)+'%':'N/A'
+document.getElementById('nmMc').textContent=nm>0?f1(nm*100)+'%':'N/A'
+document.getElementById('heroVal').textContent=m>0?f1(m)+'x':'N/A'
+document.getElementById('heroDesc').textContent=m>0?'每 1 元营收对应 \u200E'+f1(m)+' 元企业价值':'营收为 0 无法计算'
+document.getElementById('tRev').textContent=m>0?f1(m)+'x':'N/A'
+document.getElementById('tEbitda').textContent=ebM>0?f1(ebM)+'x':'N/A'
+document.getElementById('tMargin').textContent=em>0?f1(em*100)+'%':'N/A'
+document.getElementById('tPe').textContent=pe>0?f1(pe)+'x':'N/A'
+// implied net margin = EV/Revenue / PE (rough)
+var impliedNm=pe>0&&m>0?(m/pe*100):0
+document.getElementById('tNi').textContent=nm>0?f1(nm*100)+'%':(impliedNm>0?'~'+f1(impliedNm)+'%':'N/A')
+// status
+var sb=document.getElementById('sb'),sd=document.getElementById('sd')
+if(m<0.5){sb.textContent='\u4F4E';sb.className='sb g';sd.textContent='EV/Revenue\u4F4E\u4E8E\u591A\u6570\u884C\u4E1A\uFF0C\u53EF\u80FD\u662F\u4F4E\u6BDB\u5229\u7387\u884C\u4E1A\u3002\u8BF7\u786E\u8BA4\u5229\u6DA6\u7387\u662F\u5426\u80FD\u652F\u6491\uFF0C\u5426\u5219\u53EF\u80FD\u88AB\u4F4E\u4F30\u3002'}
+else if(m<1.5){sb.textContent='\u9002\u4E2D';sb.className='sb bl';sd.textContent='\u5904\u4E8E\u5236\u9020/\u96F6\u552E\u884C\u4E1A\u5408\u7406\u533A\u95F4\u3002\u8425\u6536\u500D\u6570\u5FC5\u987B\u914D\u5408\u5229\u6DA6\u7387\u4E00\u8D77\u5224\u65AD\u3002'}
+else if(m<4){sb.textContent='\u504F\u9AD8';sb.className='sb y';sd.textContent='\u4E0E\u6D88\u8D39\u54C1\u724C\u884C\u4E1A\u5339\u914D\u3002\u9AD8\u500D\u6570\u672C\u8EAB\u4E0D\u8D35\uFF0C\u9AD8\u500D\u6570+\u4F4E\u5229\u6DA6\u7387\u624D\u8D35\u3002'}
+else{sb.textContent='\u9AD8';sb.className='sb r';sd.textContent='\u4E0E\u79D1\u6280/\u4E92\u8054\u7F51\u884C\u4E1A\u5339\u914D\u3002\u9AD8\u8425\u6536\u500D\u6570\u610F\u5473\u5E02\u573A\u9884\u671F\u672A\u6765\u5229\u6DA6\u7387\u5927\u5E45\u63D0\u5347\u3002'}
+}
+for(var k in el)el[k].addEventListener('input',upd);upd()
+})()
+</script>
+</body>
+</html>
