@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV/FCF 自由现金流分析器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#fff;color:#1e293b;padding:28px;max-width:800px;margin:0 auto
+}
+h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.subtitle{font-size:13px;color:#64748b;margin-bottom:14px}
+.f-card{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 16px;text-align:center;font-size:14px;font-weight:600;
+  color:#2C3E6B;margin-bottom:14px;line-height:1.6
+}
+.f-card em{font-style:normal;color:#e11d48;font-weight:700}
+.ctrl{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 18px
+}
+@media(max-width:600px){.ctrl{grid-template-columns:1fr}}
+.cg{margin-bottom:12px}
+.cg:last-child{margin-bottom:0}
+.cg label{
+  font-size:12px;color:#64748b;display:flex;justify-content:space-between;margin-bottom:3px;font-weight:500
+}
+.cg label span{color:#1e293b;font-weight:600}
+.cg input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
+  background:#e2e8f0;outline:none;margin:3px 0
+}
+.cg input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#2C3E6B;
+  cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(44,62,107,.3);transition:transform .15s
+}
+.cg input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.cg input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;border:2px solid #fff
+}
+.hero{
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:14px;text-align:center
+}
+.hero .lbl{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px;margin-bottom:3px}
+.hero .val{font-size:48px;font-weight:700;line-height:1.1;margin-bottom:3px;transition:color .2s}
+.hero .desc{font-size:13px;font-weight:500}
+.hero .sub{font-size:12px;color:#64748b;margin-top:2px}
+.ladder{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px
+}
+.lad{
+  text-align:center;padding:8px 6px;border-radius:8px;font-size:11px;line-height:1.4
+}
+.lad .lm{font-size:10px;color:#64748b;margin-bottom:2px}
+.lad .lv{font-size:16px;font-weight:600}
+.tri-box{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#1e293b;line-height:1.6
+}
+.tri-box strong{color:#2C3E6B}
+.sbar{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px;margin-bottom:14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px
+}
+.sb{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.g{background:#dcfce7;color:#15803d}
+.y{background:#fef3c7;color:#92400e}
+.r{background:#fce4ec;color:#c62828}
+.bl{background:#e6f1fb;color:#185fa5}
+.sd{font-size:12px;color:#64748b;flex:1}
+.mr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.mc{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+  padding:8px 10px;text-align:center;flex:1;min-width:70px
+}
+.mc .lbl{font-size:10px;color:#94a3b8;margin-bottom:2px;font-weight:500;letter-spacing:.3px}
+.mc .val{font-size:20px;font-weight:600;color:#1e293b;line-height:1.3}
+.fn{font-size:11px;color:#94a3b8;line-height:1.5}
+.fn em{font-style:normal;color:#c62828}
+</style>
+</head>
+<body>
+
+<h1>EV / FCF 自由现金流分析器</h1>
+<p class="subtitle">FCF = 经营活动现金流 - Capex。扣完维持生意必需的开支，真正能拿走多少钱?</p>
+
+<div class="f-card">FCF = EBITDA <em>-</em> 营运资本变动 <em>-</em> 实际税款 <em>-</em> Capex</div>
+
+<div class="ctrl">
+  <div class="cg">
+    <label>市值 (Market Cap) <span id="mcV">1,000</span></label>
+    <input type="range" id="mc" min="200" max="3000" value="1000" step="10">
+    <label style="margin-top:8px">总负债 (Debt) <span id="debtV">300</span></label>
+    <input type="range" id="debt" min="0" max="2500" value="300" step="10">
+    <label style="margin-top:8px">现金 (Cash) <span id="cashV">150</span></label>
+    <input type="range" id="cash" min="0" max="1500" value="150" step="10">
+  </div>
+  <div class="cg">
+    <label>EBITDA <span id="ebV">120</span></label>
+    <input type="range" id="eb" min="10" max="500" value="120" step="5">
+    <label style="margin-top:8px">Capex 占 EBITDA <span id="cxV">25%</span></label>
+    <input type="range" id="cx" min="0" max="70" value="25" step="1">
+    <label style="margin-top:8px">营运资本占 EBITDA <span id="wcV">10%</span></label>
+    <input type="range" id="wc" min="-20" max="40" value="10" step="1">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:-2px;">
+      <span>释放现金 -20%</span><span>占用现金 40%</span>
+    </div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="lbl">EV / FCF</div>
+  <div class="val" id="heroVal">19.2x</div>
+  <div class="desc" id="heroDesc">回收期 19.2 年，在消费品合理范围内</div>
+  <div class="sub">FCF = <span id="fcfDisp">60</span> &nbsp;·&nbsp; FCF/EBITDA = <span id="convDisp">50%</span></div>
+</div>
+
+<div class="ladder">
+  <div class="lad" style="background:#E6F1FB;border:1px solid #B5D4F4;">
+    <div class="lm">营收</div><div class="lv" style="color:#185fa5;" id="ladRev">2.3x</div>
+  </div>
+  <div class="lad" style="background:#E1F5EE;border:1px solid #9FE1CB;">
+    <div class="lm">EBITDA</div><div class="lv" style="color:#0F6E56;" id="ladEb">9.6x</div>
+  </div>
+  <div class="lad" style="background:#FAEEDA;border:1px solid #FAC775;">
+    <div class="lm">EBIT</div><div class="lv" style="color:#854F0B;" id="ladEbit">12.8x</div>
+  </div>
+  <div class="lad" style="background:#FCEBEB;border:1px solid #F7C1C1;">
+    <div class="lm">FCF</div><div class="lv" style="color:#A32D2D;" id="ladFcf">19.2x</div>
+  </div>
+</div>
+
+<div class="tri-box" id="triBox">
+  <strong>FCF 转化率:</strong> FCF/EBITDA = <span id="tConv">50%</span>
+  &nbsp;|&nbsp; EV/EBITDA = <span id="tEb">9.6x</span> &nbsp;|&nbsp; EV/FCF = <span id="tFcf">19.2x</span>
+  &nbsp;|&nbsp; <strong>Capex/EBITDA:</strong> <span id="tCx">25%</span>
+  &nbsp;|&nbsp; <strong>营运资本/EBITDA:</strong> <span id="tWc">+10%</span>
+</div>
+
+<div class="sbar">
+  <span class="sb bl" id="sb">适中</span>
+  <span class="sd" id="sd">FCF 转化率 50%，属于中等偏上的现金生成质量。</span>
+</div>
+
+<div class="mr">
+  <div class="mc"><div class="lbl">企业价值</div><div class="val" id="evMc">1,150</div></div>
+  <div class="mc"><div class="lbl">EBITDA</div><div class="val" id="ebMc">120</div></div>
+  <div class="mc"><div class="lbl">FCF</div><div class="val" id="fcfMc">60</div></div>
+  <div class="mc"><div class="lbl">转化率</div><div class="val" id="cnvMc">50%</div></div>
+</div>
+
+<p class="fn">
+  FCF = 经营活动现金流 - 资本开支。不含利息费用(FCFF口径)，与 EV 口径匹配。<br>
+  FCF 转化率(FCF/EBITDA) &gt; 80% 为优秀转化，&lt; 30% 说明现金被 Capex 或营运资本大量吞噬。<br>
+  <em>&#x26A0;</em> 注意: 高增长公司 Capex 大，FCF 偏低不代表经营差。需结合增长阶段判断。本工具仅供参考。
+</p>
+
+<script>
+(function(){
+function f(n){return Math.round(n)}
+function f1(n){return n.toFixed(1)}
+var el={mc:document.getElementById('mc'),debt:document.getElementById('debt'),cash:document.getElementById('cash'),eb:document.getElementById('eb'),cx:document.getElementById('cx'),wc:document.getElementById('wc')}
+function upd(){
+var mc=parseFloat(el.mc.value),debt=parseFloat(el.debt.value),cash=parseFloat(el.cash.value),ebitda=parseFloat(el.eb.value),cR=parseFloat(el.cx.value),wcR=parseFloat(el.wc.value)
+document.getElementById('mcV').textContent=f(mc)
+document.getElementById('debtV').textContent=f(debt)
+document.getElementById('cashV').textContent=f(cash)
+document.getElementById('ebV').textContent=f(ebitda)
+document.getElementById('cxV').textContent=cR+'%'
+document.getElementById('wcV').textContent=(wcR>=0?'+':'')+wcR+'%'
+var ev=mc+debt-cash,da=ebitda*0.3,ebit=ebitda-da,capex=ebitda*cR/100,wcAmt=ebitda*wcR/100,tax=ebitda*0.18
+var fcf=ebitda-wcAmt-tax-capex
+var evEb=ev/ebitda,evFcf=fcf>0?ev/fcf:0,evRev=fcf>0?ev/(fcf/0.1):ev/5,evEbit=ebit>0?ev/ebit:0,conv=fcf/ebitda
+// ladder
+document.getElementById('ladEb').textContent=evEb>0?f1(evEb)+'x':'N/A'
+document.getElementById('ladEbit').textContent=evEbit>0?f1(evEbit)+'x':'N/A'
+document.getElementById('ladFcf').textContent=evFcf>0?f1(evFcf)+'x':'N/A'
+document.getElementById('ladRev').textContent=evEb>0?f1(evEb*(ebitda/(ebitda*2)))+'x':'N/A'
+// main display
+document.getElementById('evMc').textContent=f(ev)
+document.getElementById('ebMc').textContent=f(ebitda)
+document.getElementById('fcfDisp').textContent=fcf>0?f(fcf):'N/A'
+document.getElementById('fcfMc').textContent=fcf>0?f(fcf):'N/A'
+document.getElementById('convDisp').textContent=conv>0?f1(conv*100)+'%':'N/A'
+document.getElementById('cnvMc').textContent=conv>0?f1(conv*100)+'%':'N/A'
+document.getElementById('heroVal').textContent=evFcf>0?f1(evFcf)+'x':'N/A'
+document.getElementById('tConv').textContent=conv>0?f1(conv*100)+'%':'N/A'
+document.getElementById('tEb').textContent=evEb>0?f1(evEb)+'x':'N/A'
+document.getElementById('tFcf').textContent=evFcf>0?f1(evFcf)+'x':'N/A'
+document.getElementById('tCx').textContent=cR+'%'
+document.getElementById('tWc').textContent=(wcR>=0?'+':'')+wcR+'%'
+// hero desc
+var hd=document.getElementById('heroDesc')
+if(evFcf>0){
+  if(evFcf<10)hd.textContent='回收期'+f1(evFcf)+'年，偏低，可能被低估或经营风险大'
+  else if(evFcf<18)hd.textContent='回收期'+f1(evFcf)+'年，在成熟稳定行业合理范围内'
+  else if(evFcf<25)hd.textContent='回收期'+f1(evFcf)+'年，偏高，需增长预期支撑'
+  else hd.textContent='回收期'+f1(evFcf)+'年，显著偏高，需极高增长或极强护城河'
+}
+// status
+var sb=document.getElementById('sb'),sd=document.getElementById('sd')
+if(conv<0.2){sb.textContent='低转化';sb.className='sb r';sd.textContent='FCF/EBITDA仅'+f1(conv*100)+'%，现金被Capex或营运资本大量吞噬。检查是否属于正常扩张期。'}
+else if(conv<0.4){sb.textContent='较低';sb.className='sb y';sd.textContent='FCF转化率'+f1(conv*100)+'%，属于较重资产行业特征。注意FCF是否稳定。'}
+else if(conv<0.65){sb.textContent='适中';sb.className='sb bl';sd.textContent='FCF转化率'+f1(conv*100)+'%，现金生成质量中等偏上。'}
+else{sb.textContent='优秀';sb.className='sb g';sd.textContent='FCF转化率'+f1(conv*100)+'%，盈利质量高，利润几乎全转化为现金。'}
+}
+for(var k in el)el[k].addEventListener('input',upd);upd()
+})()
+</script>
+</body>
+</html>
