@@ -97,7 +97,8 @@ h1{font-size:22px;font-weight:600;margin-bottom:4px}
 </head>
 <body>
 
-<p class="subtitle" style="margin-bottom:16px">如果花 EV 买下整家公司，需要多少年 EBITDA 才能回本?</p>
+<h1>EV / EBITDA 估值分析器</h1>
+<p class="subtitle">如果花 EV 买下整家公司，需要多少年 EBITDA 才能回本?</p>
 
 <div class="f-card">(市值 + 负债 - 现金) / EBITDA</div>
 
@@ -163,13 +164,9 @@ h1{font-size:22px;font-weight:600;margin-bottom:4px}
   </div>
 </div>
 
-<div class="cross">
-  <strong>行业参考:</strong> 消费 8-12x | 科技 15-25x | 工业 7-11x | 医疗 12-18x | 能源 4-8x | 当前 <strong id="curRef">9.8x</strong>
-</div>
-
-<p class="fn">
+<div class="fn">
   EBITDA 推荐路径: 营业利润 + 利息费用 + D&A。反推: 净利润+所得税+利息+D&A+(营业外支出-营业外收入)。<br>
-  <em>&#x26A0; 陷阱:</em> 不反映 Capex | 忽略营运资本 | 可被操纵 | 金融行业无效 | 本工具仅供参考学习不构成投资建议
+  <em>&#x26A0; 陷阱:</em> 不反映 Capex | 忽略营运资本 | 可被操纵 | 金融行业无效 | 本工具仅供参考
 </p>
 
 <script>
@@ -193,7 +190,6 @@ document.getElementById('ebitMc').textContent=f(ebit)
 document.getElementById('heroVal').textContent=m>0?f1(m)+'x':'N/A'
 document.getElementById('payback').textContent=m>0?f1(m):'N/A'
 document.getElementById('pbMc').textContent=m>0?f1(m):'N/A'
-document.getElementById('curRef').textContent=m>0?f1(m)+'x':'N/A'
 var sb=document.getElementById('sb'),sd=document.getElementById('sd'),hd=document.getElementById('heroDesc')
 if(m<6){sb.textContent='偏低';sb.className='sb g';sd.textContent='低于多数行业区间。可能低估,也可能存在结构性风险。';hd.textContent='低于行业均值'}
 else if(m<12){sb.textContent='适中';sb.className='sb bl';sd.textContent='处于消费/工业合理区间。拖动滑块观察变化。';hd.textContent='消费/工业合理区间'}
