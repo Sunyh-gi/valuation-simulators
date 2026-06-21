@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV/EBIT 估值分析器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#fff;color:#1e293b;padding:28px;max-width:800px;margin:0 auto
+}
+h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.subtitle{font-size:13px;color:#64748b;margin-bottom:14px}
+
+.f-card{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 16px;text-align:center;font-size:14px;font-weight:600;
+  color:#2C3E6B;margin-bottom:14px;line-height:1.6
+}
+
+.ctrl{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 18px
+}
+@media(max-width:600px){.ctrl{grid-template-columns:1fr}}
+.cg{margin-bottom:12px}
+.cg:last-child{margin-bottom:0}
+.cg label{
+  font-size:12px;color:#64748b;display:flex;justify-content:space-between;margin-bottom:3px;font-weight:500
+}
+.cg label span{color:#1e293b;font-weight:600}
+.cg input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
+  background:#e2e8f0;outline:none;margin:3px 0
+}
+.cg input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#2C3E6B;
+  cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(44,62,107,.3);transition:transform .15s
+}
+.cg input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.cg input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;border:2px solid #fff
+}
+
+.hero{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px
+}
+.hero-box{
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;text-align:center
+}
+.hero-box .lbl{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px;margin-bottom:3px}
+.hero-box .val{font-size:42px;font-weight:700;line-height:1.1;margin-bottom:2px;transition:color .2s}
+.hero-box .desc{font-size:13px;font-weight:500}
+.hero-box .sub{font-size:11px;color:#64748b;margin-top:2px}
+
+.sbar{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px;margin-bottom:14px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px
+}
+.sb{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.g{background:#dcfce7;color:#15803d}
+.y{background:#fef3c7;color:#92400e}
+.r{background:#fce4ec;color:#c62828}
+.bl{background:#e6f1fb;color:#185fa5}
+.gy{background:#f1f5f9;color:#475569}
+.sd{font-size:12px;color:#64748b;flex:1}
+
+.da-gap{
+  background:linear-gradient(135deg,#fefce8,#fef9e7);border:1px solid #fde68a;
+  border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#92400e;line-height:1.6
+}
+.da-gap strong{color:#92400e}
+
+.mr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.mc{
+  background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+  padding:8px 10px;text-align:center;flex:1;min-width:70px
+}
+.mc .lbl{font-size:10px;color:#94a3b8;margin-bottom:2px;font-weight:500;letter-spacing:.3px}
+.mc .val{font-size:20px;font-weight:600;color:#1e293b;line-height:1.3}
+
+.guide{
+  background:linear-gradient(135deg,#E8EDF3,#eef2f8);border:1px solid #CDD6E4;
+  border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#1e293b;line-height:1.6
+}
+.guide strong{color:#2C3E6B}
+
+.fn{font-size:11px;color:#94a3b8;line-height:1.5}
+</style>
+</head>
+<body>
+
+<h1>EV / EBIT 估值分析器</h1>
+<p class="subtitle">EBIT = EBITDA - D&A。D&A占比越大，两个倍数差距越大</p>
+
+<div class="f-card">EV/EBIT = (市值 + 负债 - 现金) / (EBITDA - D&A)</div>
+
+<div class="ctrl">
+  <div class="cg">
+    <label>市值 (Market Cap) <span id="mcV">1,000</span></label>
+    <input type="range" id="mc" min="200" max="3000" value="1000" step="10">
+    <label style="margin-top:8px">总负债 (Debt) <span id="debtV">300</span></label>
+    <input type="range" id="debt" min="0" max="2500" value="300" step="10">
+    <label style="margin-top:8px">现金 (Cash) <span id="cashV">150</span></label>
+    <input type="range" id="cash" min="0" max="1500" value="150" step="10">
+  </div>
+  <div class="cg">
+    <label>EBITDA <span id="ebV">120</span></label>
+    <input type="range" id="eb" min="10" max="500" value="120" step="5">
+    <label style="margin-top:8px">D&A 占 EBITDA 比重 <span id="daV">30%</span></label>
+    <input type="range" id="da" min="3" max="60" value="30" step="1">
+    <label style="margin-top:8px">净利率 (Net Margin) <span id="nmV">8%</span></label>
+    <input type="range" id="nm" min="1" max="30" value="8" step="1">
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-box">
+    <div class="lbl">EV / EBITDA</div>
+    <div class="val" id="heroEbitda">9.6x</div>
+    <div class="desc" style="font-size:12px;color:#1D9E75;">不含D&A的毛现金流</div>
+  </div>
+  <div class="hero-box">
+    <div class="lbl">EV / EBIT</div>
+    <div class="val" id="heroEbit">13.7x</div>
+    <div class="desc" style="font-size:12px;color:#c62828;">扣除D&A后更保守</div>
+  </div>
+</div>
+
+<div class="da-gap" id="daGap">
+  <strong>DA 占比: 30%</strong> — 重资产，EV/EBITDA(9.6x) 与 EV/EBIT 相差 <strong>+4.1x (+43%)</strong>。<span id="gapAdvice">跨行业比较时，EV/EBITDA 更合适。同行业轻资产可比，EV/EBIT 更保守。</span>
+</div>
+
+<div class="sbar">
+  <span class="sb bl" id="sb">适中</span>
+  <span class="sd" id="sd">EV/EBIT 处于消费/工业合理区间。D&A占比决定了两个倍数差距。</span>
+</div>
+
+<div class="mr">
+  <div class="mc"><div class="lbl">企业价值</div><div class="val" id="evMc">1,150</div></div>
+  <div class="mc"><div class="lbl">EBITDA</div><div class="val" id="ebMc">120</div></div>
+  <div class="mc"><div class="lbl">EBIT</div><div class="val" id="ebitMc">84</div></div>
+  <div class="mc"><div class="lbl">DA占比</div><div class="val" id="daPct">30%</div></div>
+</div>
+
+<div class="guide">
+  <strong>使用指南:</strong> D&A占比&nbsp;<10%&nbsp;两个倍数几乎一致&nbsp;|&nbsp;10-25%&nbsp;可同时用&nbsp;|&nbsp;25-40%&nbsp;首选EBITDA，EBIT做参考&nbsp;|&nbsp;&gt;40%&nbsp;只用EBITDA
+</div>
+
+<p class="fn">
+  EBIT = EBITDA - D&A。在中国利润表上，EBIT&asymp;营业利润(严格来说需调整财务费用)。<br>
+  D&A占比越大，EV/EBIT相对于EV/EBITDA的溢价越高——这本身反映的是资产结构，不一定是估值偏贵。本工具仅供参考。
+</p>
+
+<script>
+(function(){
+function f(n){return Math.round(n)}
+function f1(n){return n.toFixed(1)}
+var el={mc:document.getElementById('mc'),debt:document.getElementById('debt'),cash:document.getElementById('cash'),eb:document.getElementById('eb'),da:document.getElementById('da'),nm:document.getElementById('nm')}
+function upd(){
+var mc=parseFloat(el.mc.value),debt=parseFloat(el.debt.value),cash=parseFloat(el.cash.value),ebitda=parseFloat(el.eb.value),daR=parseFloat(el.da.value),nm=parseFloat(el.nm.value)
+document.getElementById('mcV').textContent=f(mc)
+document.getElementById('debtV').textContent=f(debt)
+document.getElementById('cashV').textContent=f(cash)
+document.getElementById('ebV').textContent=f(ebitda)
+document.getElementById('daV').textContent=daR+'%'
+document.getElementById('nmV').textContent=nm+'%'
+var ev=mc+debt-cash,m=ebitda>0?ev/ebitda:0,da=ebitda*daR/100,ebit=ebitda-da,ni=ebit*0.75
+document.getElementById('evMc').textContent=f(ev)
+document.getElementById('ebMc').textContent=f(ebitda)
+document.getElementById('ebitMc').textContent=f(ebit)
+document.getElementById('daPct').textContent=daR+'%'
+var ebitdaX=m>0?f1(m)+'x':'N/A'
+var ebitX=ebit>0?f1(ev/ebit)+'x':'N/A'
+document.getElementById('heroEbitda').textContent=ebitdaX
+document.getElementById('heroEbit').textContent=ebitX
+// DA gap box
+var dg=document.getElementById('daGap')
+var gap=ev/ebit-ev/ebitda,gapPct=((ev/ebit)/(ev/ebitda)-1)*100
+dg.innerHTML='<strong>DA\u5360\u6BD4: '+daR+'%</strong> \u2014 '+
+  (daR<10?'\u8F7B\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE\u4E0D\u5230 10%\u3002\u4E24\u4E2A\u500D\u6570\u968F\u4FBF\u7528\uFF0C\u5DEE\u522B\u5FFD\u7565\u3002':
+   daR<25?'\u8D44\u4EA7\u4E2D\u7B49\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u540C\u884C\u4E1A\u53EF\u540C\u65F6\u7528\uFF0C\u4E0D\u540C\u884C\u4E1A\u9009EBITDA\u3002':
+   daR<40?'\u91CD\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u8DE8\u884C\u4E1A\u6BD4\u8F83\u65F6\uFF0CEV/EBITDA \u66F4\u5408\u9002\u3002\u540C\u884C\u4E1A\u8F7B\u8D44\u4EA7\u53EF\u6BD4\uFF0CEV/EBIT \u66F4\u4FDD\u5B88\u3002':
+   '\u6781\u91CD\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u8DE8\u884C\u4E1A/\u540C\u884C\u4E1A\u5747\u5EFA\u8BAE\u53EA\u7528EV/EBITDA\uFF0CEV/EBIT\u4F1A\u663E\u8457\u504F\u9AD8\u3002')
+// Status
+var sb=document.getElementById('sb'),sd=document.getElementById('sd')
+var ebitM=ebit>0?ev/ebit:0
+if(ebitM<7){sb.textContent='\u4F4E';sb.className='sb g';sd.textContent='EV/EBIT\u4F4E\u4E8E\u884C\u4E1A\u591A\u6570\u533A\u95F4\u3002\u8BF7\u786E\u8BA4\u662F\u771F\u6B63\u4F4E\u4F30\u8FD8\u662F\u4E1A\u52A1\u5728\u6076\u5316\u3002'}
+else if(ebitM<12){sb.textContent='\u9002\u4E2D';sb.className='sb bl';sd.textContent='EV/EBIT\u5904\u4E8E\u6D88\u8D39/\u5DE5\u4E1A\u5408\u7406\u533A\u95F4\u3002D&A\u5360\u6BD4\u51B3\u5B9A\u4E86\u4E24\u4E2A\u500D\u6570\u5DEE\u8DDD\u3002'}
+else if(ebitM<20){sb.textContent='\u504F\u9AD8';sb.className='sb y';sd.textContent='EV/EBIT\u504F\u9AD8\uFF0C\u4E0E\u79D1\u6280/\u533B\u7597\u884C\u4E1A\u5339\u914D\u3002\u786E\u8BA4D&A\u5360\u6BD4\u4E0D\u9AD8\u518D\u7528\u6B64\u500D\u6570\u3002'}
+else{sb.textContent='\u9AD8\u4F30';sb.className='sb r';sd.textContent='EV/EBIT\u663E\u8457\u504F\u9AD8\u3002\u5982\u679C\u662F\u91CD\u8D44\u4EA7\u884C\u4E1A\uFF0C\u8BF7\u770B EV/EBITDA\u3002'}
+}
+for(var k in el)el[k].addEventListener('input',upd);upd()
+})()
+</script>
+</body>
+</html>
