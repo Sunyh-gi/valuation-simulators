@@ -129,7 +129,7 @@ h1{font-size:22px;font-weight:600;margin-bottom:4px}
 </div>
 
 <div class="da-gap" id="daGap">
-  <strong>DA 占比: 30%</strong> — 重资产，EV/EBITDA(9.6x) 与 EV/EBIT 相差 <strong>+4.1x (+43%)</strong>。<span id="gapAdvice">跨行业比较时，EV/EBITDA 更合适。同行业轻资产可比，EV/EBIT 更保守。</span>
+  <strong>DA 占比: 30%</strong> — 重资产，EV/EBITDA(9.6x) 与 EV/EBIT 相差 <strong>+4.1x (+43%)</strong>。<span id="gapAdvice">D&A 占比大、折旧政策差异显著，跨行业比较时 EV/EBITDA 因剥离折旧而可比性最强。同行业且折旧政策一致时，EV/EBIT 作为保守验证。</span>
 </div>
 
 <div class="sbar">
@@ -178,11 +178,11 @@ document.getElementById('heroEbit').textContent=ebitX
 // DA gap box
 var dg=document.getElementById('daGap')
 var gap=ev/ebit-ev/ebitda,gapPct=((ev/ebit)/(ev/ebitda)-1)*100
-dg.innerHTML='<strong>DA\u5360\u6BD4: '+daR+'%</strong> \u2014 '+
-  (daR<10?'\u8F7B\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE\u4E0D\u5230 10%\u3002\u4E24\u4E2A\u500D\u6570\u968F\u4FBF\u7528\uFF0C\u5DEE\u522B\u5FFD\u7565\u3002':
-   daR<25?'\u8D44\u4EA7\u4E2D\u7B49\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u540C\u884C\u4E1A\u53EF\u540C\u65F6\u7528\uFF0C\u4E0D\u540C\u884C\u4E1A\u9009EBITDA\u3002':
-   daR<40?'\u91CD\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u8DE8\u884C\u4E1A\u6BD4\u8F83\u65F6\uFF0CEV/EBITDA \u66F4\u5408\u9002\u3002\u540C\u884C\u4E1A\u8F7B\u8D44\u4EA7\u53EF\u6BD4\uFF0CEV/EBIT \u66F4\u4FDD\u5B88\u3002':
-   '\u6781\u91CD\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u8DE8\u884C\u4E1A/\u540C\u884C\u4E1A\u5747\u5EFA\u8BAE\u53EA\u7528EV/EBITDA\uFF0CEV/EBIT\u4F1A\u663E\u8457\u504F\u9AD8\u3002')
+ dg.innerHTML='<strong>DA\u5360\u6BD4: '+daR+'%</strong> \u2014 '+
+   (daR<10?'\u8F7B\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE\u4E0D\u5230 10%\uFF0CD&A\u5F71\u54CD\u5FFD\u7565\u3002\u4E24\u4E2A\u500D\u6570\u4EFB\u9009\u3002':
+    daR<25?'\u8D44\u4EA7\u4E2D\u7B49\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u540C\u884C\u4E1A\u5EFA\u8BAE\u540C\u65F6\u7528\uFF0CEBITDA\u4E3A\u4E3B\u3002\u4E0D\u540C\u884C\u4E1A\u53EA\u7528EBITDA\u3002':
+    daR<40?'\u91CD\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u6298\u65E7\u653F\u7B56\u5DEE\u5F02\u663E\u8457\uFF0C\u9996\u9009 EV/EBITDA\uFF08\u5265\u79BB\u6298\u65E7\u626D\u66F2\uFF09\u3002\u540C\u884C\u4E1A\u4E14\u6298\u65E7\u4E00\u81F4\u65F6\uFF0CEV/EBIT \u53EF\u4F5C\u4FDD\u5B88\u9A8C\u8BC1\u3002':
+    '\u6781\u91CD\u8D44\u4EA7\uFF0CEV/EBITDA('+ebitdaX+') \u4E0E EV/EBIT \u76F8\u5DEE <strong>+'+f1(gap)+'x (+'+f1(gapPct)+'%)</strong>\u3002\u6298\u65E7\u626D\u66F2\u6781\u5927\uFF0C\u53EA\u7528 EV/EBITDA\u3002EV/EBIT \u6CA1\u6709\u53EF\u6BD4\u6027\u610F\u4E49\u3002')
 // Status
 var sb=document.getElementById('sb'),sd=document.getElementById('sd')
 var ebitM=ebit>0?ev/ebit:0
