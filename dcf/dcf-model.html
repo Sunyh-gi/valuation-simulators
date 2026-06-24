@@ -3,260 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>完整 DCF 两阶段模型模拟器</title>
+<title>DCF两阶段估值模型</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: #fff; color: #1e293b; line-height: 1.4;
-  max-width: 500px; margin: 0 auto; padding: 10px 10px;
+  background: #fff; color: #1e293b; line-height: 1.3;
+  max-width: 500px; margin: 0 auto; padding: 8px 10px;
 }
-h1 { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
+h1 { font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
 
-.assumptions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px; }
-.asm-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;
-  padding: 4px 7px;
+.asm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 5px; }
+.asm {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px;
+  padding: 3px 5px;
 }
-.asm-card label { display: block; font-size: 9px; font-weight: 600; color: #2C3E6B; margin-bottom: 0; }
-.asm-card .unit { font-size: 7px; color: #94a3b8; display: block; margin-bottom: 1px; }
-.asm-card input[type="range"] {
+.asm label { display: block; font-size: 8px; font-weight: 600; color: #2C3E6B; }
+.asm .u { font-size: 7px; color: #94a3b8; display: block; margin-bottom: 1px; }
+.asm input[type="range"] {
   width: 100%; height: 2px; -webkit-appearance: none; appearance: none;
-  background: #e2e8f0; border-radius: 2px; outline: none; margin: 1px 0;
+  background: #cbd5e1; border-radius: 1px; outline: none; margin: 1px 0;
 }
-.asm-card input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 10px; height: 10px; border-radius: 50%;
-  background: #2C3E6B; border: 1.5px solid #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15); cursor: pointer;
+.asm input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 9px; height: 9px; border-radius: 50%;
+  background: #2C3E6B; border: 1.5px solid #fff; cursor: pointer;
 }
-.asm-card .val { text-align: center; font-size: 11px; font-weight: 700; color: #2C3E6B; }
+.asm .v { text-align: center; font-size: 10px; font-weight: 700; color: #2C3E6B; }
 
-.results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 6px; }
-.result-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
-  padding: 5px 6px; text-align: center;
+.res { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 5px; }
+.rc {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;
+  padding: 4px 4px; text-align: center;
 }
-.result-card .rlabel { font-size: 8px; color: #94a3b8; margin-bottom: 0; }
-.result-card .rval {
-  font-size: 16px; font-weight: 700; font-family: 'Courier New', monospace;
-}
-.result-card .rnote { font-size: 7px; color: #64748b; margin-top: 0; }
-.result-card.ev .rval { color: #2C3E6B; }
-.result-card.equity .rval { color: #0F6E56; }
-.result-card.ps .rval { color: #D85A30; }
-.result-card.tv-pct .rval { color: #BA7517; }
+.rc .rl { font-size: 7.5px; color: #94a3b8; }
+.rc .rv { font-size: 14px; font-weight: 700; font-family: 'Courier New', monospace; }
+.rc .rn { font-size: 6.5px; color: #94a3b8; }
+.rc.ev .rv{color:#2C3E6B} .rc.eq .rv{color:#0F6E56} .rc.ps .rv{color:#D85A30} .rc.tp .rv{color:#BA75117}
 
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; font-size: 9px; }
 thead th {
-  font-size: 8px; font-weight: 600; color: #64748b; text-align: center;
-  padding: 3px 4px; border-bottom: 1.5px solid #e2e8f0; background: #f8fafc;
+  font-size: 7.5px; font-weight: 600; color: #64748b; text-align: center;
+  padding: 2px 3px; border-bottom: 1.5px solid #e2e8f0; background: #f8fafc;
 }
 tbody td {
-  text-align: center; padding: 2px 4px; border-bottom: 1px solid #f1f5f9;
-  font-family: 'Courier New', monospace; font-size: 10px;
+  text-align: center; padding: 1.5px 3px; border-bottom: 1px solid #f1f5f9;
+  font-family: 'Courier New', monospace; font-size: 9px;
 }
-tbody td.label { font-family: inherit; color: #1e293b; font-weight: 500; text-align: left; font-size: 9px; }
-tr.subtotal td { font-weight: 700; color: #2C3E6B; background: #f8fafc; border-top: 1.5px solid #e2e8f0; }
-tr.terminal td { color: #854F0B; background: #FAEEDA; }
-tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top: 1.5px solid #5DCAA5; }
+tbody td.l { font-family: inherit; font-weight: 500; text-align: left; font-size: 8px; color: #334155; }
+tr.st td { font-weight: 700; color: #2C3E6B; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+tr.tv td { color: #854F0B; background: #FEF8ED; font-size: 8.5px; }
+tr.fi td { font-weight: 700; color: #0F6E56; background: #ECFDF5; border-top: 1.5px solid #a7d8c9; }
 
-.footnote {
-  font-size: 8px; color: #94a3b8; text-align: center;
-  padding-top: 4px; margin-top: 4px; border-top: 1px solid #e2e8f0;
-}
-
-@media (max-width: 600px) {
-  .assumptions-grid { grid-template-columns: 1fr 1fr; }
-  .results-row { grid-template-columns: 1fr 1fr; }
-}
+.fn { font-size: 7px; color: #c4d0dc; text-align: center; padding-top: 3px; border-top: 1px solid #eef2f7; }
 </style>
 </head>
 <body>
 
-<h1>完整 DCF 两阶段估值模型</h1>
+<h1>DCF 两阶段估值模型</h1>
 
-<div class="assumptions-grid">
-  <div class="asm-card">
-    <label>FCFF₀</label><span class="unit">基准年FCF（百万）</span>
-    <input type="range" id="fcff0" min="20" max="500" value="100" step="5">
-    <div class="val" id="fcff0Val">100</div>
-  </div>
-  <div class="asm-card">
-    <label>预测期增长率</label><span class="unit">FCFF年化增速</span>
-    <input type="range" id="growth" min="1" max="25" value="8" step="0.5">
-    <div class="val" id="growthVal">8.0%</div>
-  </div>
-  <div class="asm-card">
-    <label>预测期年数 n</label><span class="unit">显式预测年数</span>
-    <input type="range" id="years" min="3" max="8" value="5" step="1">
-    <div class="val" id="yearsVal">5</div>
-  </div>
-  <div class="asm-card">
-    <label>WACC</label><span class="unit">加权平均资本成本</span>
-    <input type="range" id="wacc" min="5" max="15" value="10" step="0.1">
-    <div class="val" id="waccVal">10.0%</div>
-  </div>
-  <div class="asm-card">
-    <label>永续增长率 g</label><span class="unit">终值期永久增速</span>
-    <input type="range" id="tvG" min="1" max="4.5" value="3" step="0.1">
-    <div class="val" id="tvGVal">3.0%</div>
-  </div>
-  <div class="asm-card">
-    <label>净负债</label><span class="unit">有息负债−超额现金</span>
-    <input type="range" id="netDebt" min="0" max="500" value="200" step="5">
-    <div class="val" id="netDebtVal">200</div>
-  </div>
-  <div class="asm-card">
-    <label>总股本</label><span class="unit">百万股</span>
-    <input type="range" id="shares" min="10" max="200" value="50" step="5">
-    <div class="val" id="sharesVal">50</div>
-  </div>
-  <div class="asm-card" id="tvCard" style="display:flex;align-items:center;justify-content:center;">
-    <div style="text-align:center;"><span class="unit" id="tvFormulaNote" style="font-size:8px;font-family:'Courier New',monospace;font-weight:600;color:#2C3E6B;">TV=FCF₆/(WACC−g)</span></div>
-  </div>
+<div class="asm-grid">
+  <div class="asm"><label>FCFF₀</label><span class="u">基准年FCF（百万）</span><input type="range" id="fcff0" min="20" max="500" value="100" step="5"><div class="v" id="fcff0Val">100</div></div>
+  <div class="asm"><label>增长率</label><span class="u">FCFF年化增速</span><input type="range" id="growth" min="1" max="25" value="8" step="0.5"><div class="v" id="growthVal">8.0%</div></div>
+  <div class="asm"><label>预测年数n</label><span class="u">显式预测年数</span><input type="range" id="years" min="3" max="8" value="5" step="1"><div class="v" id="yearsVal">5</div></div>
+  <div class="asm"><label>WACC</label><span class="u">加权平均资本成本</span><input type="range" id="wacc" min="5" max="15" value="10" step="0.1"><div class="v" id="waccVal">10.0%</div></div>
+  <div class="asm"><label>永续增长率g</label><span class="u">终值期永久增速</span><input type="range" id="tvG" min="1" max="4.5" value="3" step="0.1"><div class="v" id="tvGVal">3.0%</div></div>
+  <div class="asm"><label>净负债</label><span class="u">有息负债−超额现金</span><input type="range" id="netDebt" min="0" max="500" value="200" step="5"><div class="v" id="netDebtVal">200</div></div>
+  <div class="asm"><label>总股本</label><span class="u">百万股</span><input type="range" id="shares" min="10" max="200" value="50" step="5"><div class="v" id="sharesVal">50</div></div>
 </div>
 
-<div class="results-row">
-  <div class="result-card ev">
-    <div class="rlabel">企业价值 EV</div>
-    <div class="rval" id="resEV">1,816</div>
-    <div class="rnote">PV+PV(TV)</div>
-  </div>
-  <div class="result-card equity">
-    <div class="rlabel">股权价值</div>
-    <div class="rval" id="resEquity">1,616</div>
-    <div class="rnote">EV−净负债</div>
-  </div>
-  <div class="result-card ps">
-    <div class="rlabel">每股价值</div>
-    <div class="rval" id="resPS">32.32</div>
-    <div class="rnote">股权÷总股本</div>
-  </div>
-  <div class="result-card tv-pct">
-    <div class="rlabel">终值占比</div>
-    <div class="rval" id="resTVPct">73.9%</div>
-    <div class="rnote">PV(TV)÷EV</div>
-  </div>
+<div class="res">
+  <div class="rc ev"><div class="rl">企业价值EV</div><div class="rv" id="resEV">1816</div><div class="rn">PV+PV(TV)</div></div>
+  <div class="rc eq"><div class="rl">股权价值</div><div class="rv" id="resEquity">1616</div><div class="rn">EV−净负债</div></div>
+  <div class="rc ps"><div class="rl">每股价值</div><div class="rv" id="resPS">32.32</div><div class="rn">股权÷股本</div></div>
+  <div class="rc tp"><div class="rl">终值占比</div><div class="rv" id="resTVPct">73.9%</div><div class="rn">PV(TV)÷EV</div></div>
 </div>
 
-<div style="overflow-x:auto;">
-  <table>
-    <thead>
-      <tr><th>年份</th><th>FCFF（名义）</th><th>折现因子</th><th>折现值 PV</th></tr>
-    </thead>
-    <tbody id="dcfTableBody"></tbody>
-  </table>
-</div>
-
-<p class="footnote">
-  DCF 两阶段模型 — 仅作学习用途，不构成投资建议。终值使用 Gordon Growth Model，要求 WACC &gt; g。
-</p>
+<table>
+  <thead><tr><th>年份</th><th>FCFF（名义）</th><th>折现因子</th><th>PV</th></tr></thead>
+  <tbody id="tb"></tbody>
+</table>
+<p class="fn">DCF两阶段模型 — 仅学习用途，不构成投资建议。要求 WACC &gt; g。</p>
 
 <script>
-(function() {
-  var sl = {
-    fcff0: document.getElementById('fcff0'),
-    growth: document.getElementById('growth'),
-    years: document.getElementById('years'),
-    wacc: document.getElementById('wacc'),
-    tvG: document.getElementById('tvG'),
-    netDebt: document.getElementById('netDebt'),
-    shares: document.getElementById('shares')
-  };
-
-  function gv() {
-    return {
-      fcff0: parseFloat(sl.fcff0.value),
-      growth: parseFloat(sl.growth.value) / 100,
-      years: parseInt(sl.years.value),
-      wacc: parseFloat(sl.wacc.value) / 100,
-      tvG: parseFloat(sl.tvG.value) / 100,
-      netDebt: parseFloat(sl.netDebt.value),
-      shares: parseFloat(sl.shares.value)
-    };
-  }
-
-  function fmt(n, dec) {
-    if (dec === undefined) dec = 1;
-    return n.toFixed(dec);
-  }
-
-  function updateUI() {
-    var v = gv();
-
-    document.getElementById('fcff0Val').textContent = v.fcff0;
-    document.getElementById('growthVal').textContent = (v.growth * 100).toFixed(1) + '%';
-    document.getElementById('yearsVal').textContent = v.years;
-    document.getElementById('waccVal').textContent = (v.wacc * 100).toFixed(1) + '%';
-    document.getElementById('tvGVal').textContent = (v.tvG * 100).toFixed(1) + '%';
-    document.getElementById('netDebtVal').textContent = v.netDebt;
-    document.getElementById('sharesVal').textContent = v.shares;
-    document.getElementById('tvFormulaNote').textContent = 'TV=FCF' + (v.years + 1) + '/(WACC−g)';
-
-    if (v.wacc <= v.tvG) {
-      document.getElementById('resEV').textContent = 'N/A';
-      document.getElementById('resEquity').textContent = 'N/A';
-      document.getElementById('resPS').textContent = 'N/A';
-      document.getElementById('resTVPct').textContent = 'N/A';
-      document.getElementById('tvFormulaNote').style.color = '#c62828';
-      document.getElementById('dcfTableBody').innerHTML = '<tr><td colspan="4" style="color:#c62828;text-align:center;font-family:inherit;">WACC 必须严格大于 g，当前参数不可用</td></tr>';
+(function(){
+  var sl={fcff0:document.getElementById('fcff0'),growth:document.getElementById('growth'),years:document.getElementById('years'),wacc:document.getElementById('wacc'),tvG:document.getElementById('tvG'),netDebt:document.getElementById('netDebt'),shares:document.getElementById('shares')};
+  function gv(){return{fcff0:+sl.fcff0.value,growth:+sl.growth.value/100,years:+sl.years.value,wacc:+sl.wacc.value/100,tvG:+sl.tvG.value/100,netDebt:+sl.netDebt.value,shares:+sl.shares.value}}
+  function fmt(n,d){if(d===undefined)d=1;return n.toFixed(d)}
+  function upd(){
+    var v=gv();
+    document.getElementById('fcff0Val').textContent=v.fcff0;
+    document.getElementById('growthVal').textContent=(v.growth*100).toFixed(1)+'%';
+    document.getElementById('yearsVal').textContent=v.years;
+    document.getElementById('waccVal').textContent=(v.wacc*100).toFixed(1)+'%';
+    document.getElementById('tvGVal').textContent=(v.tvG*100).toFixed(1)+'%';
+    document.getElementById('netDebtVal').textContent=v.netDebt;
+    document.getElementById('sharesVal').textContent=v.shares;
+    if(v.wacc<=v.tvG){
+      document.getElementById('resEV').textContent='N/A';document.getElementById('resEquity').textContent='N/A';
+      document.getElementById('resPS').textContent='N/A';document.getElementById('resTVPct').textContent='N/A';
+      document.getElementById('tb').innerHTML='<tr><td colspan="4" style="color:#c62828;text-align:center;font-family:inherit;padding:4px;">WACC必须大于g</td></tr>';
       return;
     }
-
-    document.getElementById('tvFormulaNote').style.color = '#2C3E6B';
-
-    var data = [];
-    var fcff = v.fcff0 * (1 + v.growth);
-    var forecastPV = 0;
-    for (var y = 1; y <= v.years; y++) {
-      var df = Math.pow(1 + v.wacc, y);
-      var pv = fcff / df;
-      data.push({ yr: y, fcff: fcff, df: df, pv: pv });
-      forecastPV += pv;
-      fcff *= (1 + v.growth);
+    var data=[],fcff=v.fcff0*(1+v.growth),fpv=0;
+    for(var y=1;y<=v.years;y++){
+      var df=Math.pow(1+v.wacc,y),pv=fcff/df;
+      data.push({y:y,f:fcff,d:df,pv:pv});fpv+=pv;fcff*=1+v.growth;
     }
-    var lastFcff = data[data.length - 1].fcff;
-    var fcfNext = lastFcff * (1 + v.tvG);
-    var tv = fcfNext / (v.wacc - v.tvG);
-    var tvPV = tv / Math.pow(1 + v.wacc, v.years);
-    var ev = forecastPV + tvPV;
-    var equity = ev - v.netDebt;
-    var ps = equity / v.shares;
-    var tvPct = (ev > 0) ? (tvPV / ev * 100) : 0;
-
-    document.getElementById('resEV').textContent = fmt(ev, 0);
-    document.getElementById('resEquity').textContent = fmt(equity, 0);
-    document.getElementById('resPS').textContent = fmt(ps, 2);
-    document.getElementById('resTVPct').textContent = fmt(tvPct, 1) + '%';
-
-    var tb = '';
-    for (var i = 0; i < data.length; i++) {
-      var d = data[i];
-      tb += '<tr><td class="label">第 ' + d.yr + ' 年</td>' +
-        '<td>' + fmt(d.fcff, 0) + '</td>' +
-        '<td>1/' + fmt(d.df, 4) + '</td>' +
-        '<td>' + fmt(d.pv, 1) + '</td></tr>';
-    }
-    tb += '<tr class="subtotal"><td class="label">预测期 PV 合计</td><td></td><td></td>' +
-      '<td>' + fmt(forecastPV, 1) + '</td></tr>';
-    tb += '<tr class="terminal"><td class="label">终值 TV（第' + v.years + '年末）</td>' +
-      '<td>' + fmt(tv, 0) + '</td>' +
-      '<td>1/' + fmt(Math.pow(1+v.wacc, v.years), 4) + '</td>' +
-      '<td>' + fmt(tvPV, 1) + '</td></tr>';
-    tb += '<tr class="final"><td class="label">企业价值 EV</td><td></td><td></td>' +
-      '<td>' + fmt(ev, 0) + '</td></tr>';
-    tb += '<tr><td class="label">减：净负债</td><td></td><td></td>' +
-      '<td>(' + v.netDebt + ')</td></tr>';
-    tb += '<tr><td class="label" style="font-weight:700;">股权价值</td><td></td><td></td>' +
-      '<td style="font-weight:700;">' + fmt(equity, 0) + '</td></tr>';
-    tb += '<tr><td class="label">每股价值（÷' + v.shares + '百万股）</td><td></td><td></td>' +
-      '<td style="font-weight:700;color:#D85A30;">' + fmt(ps, 2) + '</td></tr>';
-    document.getElementById('dcfTableBody').innerHTML = tb;
+    var tv=data[data.length-1].f*(1+v.tvG)/(v.wacc-v.tvG);
+    var tpv=tv/Math.pow(1+v.wacc,v.years);
+    var ev=fpv+tpv,equity=ev-v.netDebt,ps=equity/v.shares,tvp=ev>0?tpv/ev*100:0;
+    document.getElementById('resEV').textContent=fmt(ev,0);
+    document.getElementById('resEquity').textContent=fmt(equity,0);
+    document.getElementById('resPS').textContent=fmt(ps,2);
+    document.getElementById('resTVPct').textContent=fmt(tvp,1)+'%';
+    var h='';
+    for(var i=0;i<data.length;i++){var d=data[i];h+='<tr><td class="l">'+d.y+'</td><td>'+fmt(d.f,0)+'</td><td>1/'+fmt(d.d,4)+'</td><td>'+fmt(d.pv,1)+'</td></tr>';}
+    h+='<tr class="st"><td class="l">预测期PV合计</td><td></td><td></td><td>'+fmt(fpv,1)+'</td></tr>';
+    h+='<tr class="tv"><td class="l">终值TV(第'+v.years+'年末)</td><td>'+fmt(tv,0)+'</td><td>1/'+fmt(Math.pow(1+v.wacc,v.years),4)+'</td><td>'+fmt(tpv,1)+'</td></tr>';
+    h+='<tr class="fi"><td class="l">企业价值EV</td><td></td><td></td><td>'+fmt(ev,0)+'</td></tr>';
+    h+='<tr><td class="l">减：净负债</td><td></td><td></td><td>('+v.netDebt+')</td></tr>';
+    h+='<tr><td class="l" style="font-weight:700;color:#0F6E56">股权价值</td><td></td><td></td><td style="font-weight:700">'+fmt(equity,0)+'</td></tr>';
+    h+='<tr><td class="l">每股价值</td><td></td><td></td><td style="font-weight:700;color:#D85A30">'+fmt(ps,2)+'</td></tr>';
+    document.getElementById('tb').innerHTML=h;
   }
-
-  Object.keys(sl).forEach(function(k) { sl[k].addEventListener('input', updateUI); });
-  updateUI();
+  Object.keys(sl).forEach(function(k){sl[k].addEventListener('input',upd)});
+  upd();
 })();
 </script>
 </body>
