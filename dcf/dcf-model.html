@@ -8,77 +8,65 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: #fff; color: #1e293b; line-height: 1.5;
-  max-width: 720px; margin: 0 auto; padding: 20px 16px;
+  background: #fff; color: #1e293b; line-height: 1.4;
+  max-width: 720px; margin: 0 auto; padding: 12px 14px;
 }
-h1 { font-size: 22px; font-weight: 600; color: #1e293b; margin-bottom: 14px; }
+h1 { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
 
-.formula-card {
-  background: linear-gradient(135deg, #E8EDF3, #eef2f8);
-  border: 1px solid #e2e8f0; border-radius: 14px;
-  padding: 16px 20px; margin-bottom: 22px;
-}
-.formula-card h2 { font-size: 14px; font-weight: 600; color: #2C3E6B; margin-bottom: 6px; }
-.formula-card .equation {
-  font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600;
-  color: #1e293b; text-align: center; padding: 6px 0;
-}
-
-.assumptions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.assumptions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 6px; }
 .asm-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
-  padding: 6px 9px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;
+  padding: 4px 7px;
 }
-.asm-card label { display: block; font-size: 10px; font-weight: 600; color: #2C3E6B; margin-bottom: 0; }
-.asm-card .unit { font-size: 8px; color: #94a3b8; display: block; margin-bottom: 2px; }
+.asm-card label { display: block; font-size: 9px; font-weight: 600; color: #2C3E6B; margin-bottom: 0; }
+.asm-card .unit { font-size: 7px; color: #94a3b8; display: block; margin-bottom: 1px; }
 .asm-card input[type="range"] {
-  width: 100%; height: 3px; -webkit-appearance: none; appearance: none;
-  background: #e2e8f0; border-radius: 2px; outline: none; margin: 2px 0;
+  width: 100%; height: 2px; -webkit-appearance: none; appearance: none;
+  background: #e2e8f0; border-radius: 2px; outline: none; margin: 1px 0;
 }
 .asm-card input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: 12px; height: 12px; border-radius: 50%;
-  background: #2C3E6B; border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.1s;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #2C3E6B; border: 1.5px solid #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15); cursor: pointer;
 }
-.asm-card input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-.asm-card .val { text-align: center; font-size: 12px; font-weight: 700; color: #2C3E6B; }
+.asm-card .val { text-align: center; font-size: 11px; font-weight: 700; color: #2C3E6B; }
 
-.results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.results-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 6px; }
 .result-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
-  padding: 10px 10px; text-align: center;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 5px 6px; text-align: center;
 }
-.result-card .rlabel { font-size: 10px; color: #94a3b8; margin-bottom: 1px; }
+.result-card .rlabel { font-size: 8px; color: #94a3b8; margin-bottom: 0; }
 .result-card .rval {
-  font-size: 20px; font-weight: 700; font-family: 'Courier New', monospace;
+  font-size: 16px; font-weight: 700; font-family: 'Courier New', monospace;
 }
-.result-card .rnote { font-size: 9px; color: #64748b; margin-top: 1px; }
+.result-card .rnote { font-size: 7px; color: #64748b; margin-top: 0; }
 .result-card.ev .rval { color: #2C3E6B; }
 .result-card.equity .rval { color: #0F6E56; }
 .result-card.ps .rval { color: #D85A30; }
 .result-card.tv-pct .rval { color: #BA7517; }
 
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; }
 thead th {
-  font-size: 10px; font-weight: 600; color: #64748b; text-align: center;
-  padding: 5px 6px; border-bottom: 2px solid #e2e8f0; background: #f8fafc;
+  font-size: 8px; font-weight: 600; color: #64748b; text-align: center;
+  padding: 3px 4px; border-bottom: 1.5px solid #e2e8f0; background: #f8fafc;
 }
 tbody td {
-  text-align: center; padding: 4px 6px; border-bottom: 1px solid #f1f5f9;
-  font-family: 'Courier New', monospace; font-size: 11px;
+  text-align: center; padding: 2px 4px; border-bottom: 1px solid #f1f5f9;
+  font-family: 'Courier New', monospace; font-size: 10px;
 }
-tbody td.label { font-family: inherit; color: #1e293b; font-weight: 500; text-align: left; }
-tr.subtotal td { font-weight: 700; color: #2C3E6B; background: #f8fafc; border-top: 2px solid #e2e8f0; }
+tbody td.label { font-family: inherit; color: #1e293b; font-weight: 500; text-align: left; font-size: 9px; }
+tr.subtotal td { font-weight: 700; color: #2C3E6B; background: #f8fafc; border-top: 1.5px solid #e2e8f0; }
 tr.terminal td { color: #854F0B; background: #FAEEDA; }
-tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top: 2px solid #5DCAA5; }
+tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top: 1.5px solid #5DCAA5; }
 
 .footnote {
-  font-size: 10px; color: #94a3b8; text-align: center;
-  padding-top: 10px; border-top: 1px solid #e2e8f0;
+  font-size: 8px; color: #94a3b8; text-align: center;
+  padding-top: 4px; margin-top: 4px; border-top: 1px solid #e2e8f0;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 600px) {
   .assumptions-grid { grid-template-columns: 1fr 1fr; }
   .results-row { grid-template-columns: 1fr 1fr; }
 }
@@ -90,12 +78,12 @@ tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top:
 
 <div class="assumptions-grid">
   <div class="asm-card">
-    <label>FCFF₀</label><span class="unit">基准年自由现金流（百万元）</span>
+    <label>FCFF₀</label><span class="unit">基准年FCF（百万）</span>
     <input type="range" id="fcff0" min="20" max="500" value="100" step="5">
     <div class="val" id="fcff0Val">100</div>
   </div>
   <div class="asm-card">
-    <label>预测期增长率</label><span class="unit">FCFF 年化增速</span>
+    <label>预测期增长率</label><span class="unit">FCFF年化增速</span>
     <input type="range" id="growth" min="1" max="25" value="8" step="0.5">
     <div class="val" id="growthVal">8.0%</div>
   </div>
@@ -115,7 +103,7 @@ tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top:
     <div class="val" id="tvGVal">3.0%</div>
   </div>
   <div class="asm-card">
-    <label>净负债</label><span class="unit">有息负债 − 超额现金（百万元）</span>
+    <label>净负债</label><span class="unit">有息负债−超额现金</span>
     <input type="range" id="netDebt" min="0" max="500" value="200" step="5">
     <div class="val" id="netDebtVal">200</div>
   </div>
@@ -125,44 +113,44 @@ tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top:
     <div class="val" id="sharesVal">50</div>
   </div>
   <div class="asm-card" id="tvCard" style="display:flex;align-items:center;justify-content:center;">
-    <div style="text-align:center;"><span class="unit" id="tvFormulaNote" style="font-size:10px;font-family:'Courier New',monospace;font-weight:600;color:#2C3E6B;">TV = FCF₆ / (WACC−g)</span></div>
+    <div style="text-align:center;"><span class="unit" id="tvFormulaNote" style="font-size:8px;font-family:'Courier New',monospace;font-weight:600;color:#2C3E6B;">TV=FCF₆/(WACC−g)</span></div>
   </div>
 </div>
 
 <div class="results-row">
   <div class="result-card ev">
-    <div class="rlabel">企业价值 EV（百万元）</div>
+    <div class="rlabel">企业价值 EV</div>
     <div class="rval" id="resEV">1,816</div>
-    <div class="rnote">预测期 PV + PV(TV)</div>
+    <div class="rnote">PV+PV(TV)</div>
   </div>
   <div class="result-card equity">
-    <div class="rlabel">股权价值（百万元）</div>
+    <div class="rlabel">股权价值</div>
     <div class="rval" id="resEquity">1,616</div>
-    <div class="rnote">EV − 净负债</div>
+    <div class="rnote">EV−净负债</div>
   </div>
   <div class="result-card ps">
-    <div class="rlabel">每股内在价值（元）</div>
+    <div class="rlabel">每股价值</div>
     <div class="rval" id="resPS">32.32</div>
-    <div class="rnote">股权价值 ÷ 总股本</div>
+    <div class="rnote">股权÷总股本</div>
   </div>
   <div class="result-card tv-pct">
-    <div class="rlabel">终值占 EV 比重</div>
+    <div class="rlabel">终值占比</div>
     <div class="rval" id="resTVPct">73.9%</div>
-    <div class="rnote">PV(TV) ÷ EV</div>
+    <div class="rnote">PV(TV)÷EV</div>
   </div>
 </div>
 
 <div style="overflow-x:auto;">
   <table>
     <thead>
-      <tr><th>年份</th><th>FCFF（名义）</th><th>折现因子 = 1/(1+WACC)^t</th><th>折现值 PV</th></tr>
+      <tr><th>年份</th><th>FCFF（名义）</th><th>折现因子</th><th>折现值 PV</th></tr>
     </thead>
     <tbody id="dcfTableBody"></tbody>
   </table>
 </div>
 
 <p class="footnote">
-  DCF 两阶段模型模拟器 — 仅作学习用途，不构成投资建议。终值使用 Gordon Growth Model（永续增长法），要求 WACC &gt; g。
+  DCF 两阶段模型 — 仅作学习用途，不构成投资建议。终值使用 Gordon Growth Model，要求 WACC &gt; g。
 </p>
 
 <script>
@@ -204,7 +192,7 @@ tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top:
     document.getElementById('tvGVal').textContent = (v.tvG * 100).toFixed(1) + '%';
     document.getElementById('netDebtVal').textContent = v.netDebt;
     document.getElementById('sharesVal').textContent = v.shares;
-    document.getElementById('tvFormulaNote').textContent = 'TV = FCF_' + (v.years + 1) + ' / (WACC−g)';
+    document.getElementById('tvFormulaNote').textContent = 'TV=FCF' + (v.years + 1) + '/(WACC−g)';
 
     if (v.wacc <= v.tvG) {
       document.getElementById('resEV').textContent = 'N/A';
@@ -247,14 +235,14 @@ tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top:
       var d = data[i];
       tb += '<tr><td class="label">第 ' + d.yr + ' 年</td>' +
         '<td>' + fmt(d.fcff, 0) + '</td>' +
-        '<td>1 / ' + fmt(d.df, 4) + '</td>' +
+        '<td>1/' + fmt(d.df, 4) + '</td>' +
         '<td>' + fmt(d.pv, 1) + '</td></tr>';
     }
     tb += '<tr class="subtotal"><td class="label">预测期 PV 合计</td><td></td><td></td>' +
       '<td>' + fmt(forecastPV, 1) + '</td></tr>';
-    tb += '<tr class="terminal"><td class="label">终值 TV（第 ' + v.years + ' 年末）</td>' +
+    tb += '<tr class="terminal"><td class="label">终值 TV（第' + v.years + '年末）</td>' +
       '<td>' + fmt(tv, 0) + '</td>' +
-      '<td>1 / ' + fmt(Math.pow(1+v.wacc, v.years), 4) + '</td>' +
+      '<td>1/' + fmt(Math.pow(1+v.wacc, v.years), 4) + '</td>' +
       '<td>' + fmt(tvPV, 1) + '</td></tr>';
     tb += '<tr class="final"><td class="label">企业价值 EV</td><td></td><td></td>' +
       '<td>' + fmt(ev, 0) + '</td></tr>';
@@ -262,7 +250,7 @@ tr.final td { font-weight: 700; color: #0F6E56; background: #E1F5EE; border-top:
       '<td>(' + v.netDebt + ')</td></tr>';
     tb += '<tr><td class="label" style="font-weight:700;">股权价值</td><td></td><td></td>' +
       '<td style="font-weight:700;">' + fmt(equity, 0) + '</td></tr>';
-    tb += '<tr><td class="label">每股价值（÷' + v.shares + ' 百万股）</td><td></td><td></td>' +
+    tb += '<tr><td class="label">每股价值（÷' + v.shares + '百万股）</td><td></td><td></td>' +
       '<td style="font-weight:700;color:#D85A30;">' + fmt(ps, 2) + '</td></tr>';
     document.getElementById('dcfTableBody').innerHTML = tb;
   }
