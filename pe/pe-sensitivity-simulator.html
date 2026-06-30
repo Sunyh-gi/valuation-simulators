@@ -5,160 +5,297 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PE 敏感性模拟器</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#fff;color:#1e293b;padding:32px;max-width:920px;margin:0 auto}
-h1{font-size:22px;font-weight:600;margin-bottom:2px;color:#2C3E6B}
-h1 small{font-size:12px;font-weight:400;color:#94a3b8;margin-left:8px}
-.sub{font-size:13px;color:#64748b;margin-bottom:14px}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #fff; color: #1e293b; padding: 32px; max-width: 800px; margin: 0 auto;
+}
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+.formula-card {
+  background: linear-gradient(135deg, #E8EDF3 0%, #eef2f8 100%);
+  border: 1px solid #CDD6E4; border-radius: 12px; padding: 12px 16px;
+  text-align: center; font-size: 14px; font-weight: 600; color: #2C3E6B;
+  margin-bottom: 14px; line-height: 1.6;
+}
+.formula-card em { font-style: normal; color: #e11d48; font-weight: 700; }
+.formula-card .sep { color: #A0B0C8; margin: 0 4px; }
 
-.fr{border:1px solid #e2e8f0;border-radius:14px;padding:10px 16px;text-align:center;font-size:15px;font-weight:600;color:#2C3E6B;margin-bottom:14px;background:#f8fafc;line-height:1.6}
-.fr em{font-style:normal;color:#e11d48;font-weight:700}
+.control-grid-3 {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 14px 18px;
+}
+@media (max-width: 600px) { .control-grid-3 { grid-template-columns: 1fr; } }
+.control-group label {
+  font-size: 12px; color: #64748b; display: block; margin-bottom: 3px; font-weight: 500;
+}
+.control-group label span { color: #1e293b; font-weight: 600; }
+.control-group input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 3px;
+  border-radius: 2px; background: #e2e8f0; outline: none; margin: 3px 0;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #2C3E6B; cursor: pointer; border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(44,62,107,0.3); transition: transform 0.15s;
+}
+.control-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%; background: #2C3E6B;
+  cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(44,62,107,0.3);
+}
+.range-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
 
-.sl{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 20px;margin-bottom:14px}
-.slr{display:flex;align-items:center;gap:12px}
-.slr label{font-size:12px;color:#64748b;min-width:52px;font-weight:500}
-.slr label em{font-style:normal;color:#1e293b;font-weight:600;font-size:13px}
-.slr input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#e2e8f0;outline:none}
-.slr input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(44,62,107,0.3)}
-.slr input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#2C3E6B;cursor:pointer;border:2px solid #fff}
-.slr .rv{font-size:12px;color:#64748b;min-width:46px;text-align:right;font-weight:600;color:#1e293b}
+.pe-hero {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 14px; margin-bottom: 14px; text-align: center;
+}
+.pe-hero .label { font-size: 11px; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 2px; }
+.pe-hero .value { font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; transition: color 0.2s; }
+.pe-hero .desc { font-size: 13px; font-weight: 500; }
 
-.hr{text-align:center;margin-bottom:14px}
-.hr .pe{font-size:56px;font-weight:700;color:#2C3E6B;line-height:1}
-.hr .pl{font-size:13px;color:#64748b;margin-top:2px}
-.hr .st{display:inline-block;margin-top:6px;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:600}
-.st-g{background:#dcfce7;color:#15803d}
-.st-r{background:#fce4ec;color:#c62828}
-.st-b{background:#f1f5f9;color:#475569}
+.status-bar {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 8px 14px; margin-bottom: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.status-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-red { background: #fce4ec; color: #c62828; }
+.badge-gray { background: #f1f5f9; color: #475569; }
+.status-desc { font-size: 12px; color: #64748b; flex: 1; }
 
-.ch{border:1px solid #e2e8f0;border-radius:14px;padding:8px 10px 6px;margin-bottom:10px}
-.ch canvas{width:100%;height:150px;display:block;border-radius:6px}
+.metric-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.metric-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 8px 10px; text-align: center; flex: 1; min-width: 80px;
+}
+.metric-card .label { font-size: 10px; color: #94a3b8; margin-bottom: 2px; font-weight: 500; letter-spacing: 0.3px; }
+.metric-card .value { font-size: 20px; font-weight: 600; color: #1e293b; line-height: 1.3; }
 
-.fn{font-size:11px;color:#94a3b8;line-height:1.5}
+.chart-box {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 8px 14px; margin-bottom: 8px;
+}
+.chart-box canvas { display: block; width: 100%; height: 150px; }
+
+.footnote { font-size: 11px; color: #94a3b8; line-height: 1.5; }
 </style>
 </head>
 <body>
 
-<h1>PE 敏感性模拟器 <small>戈登增长模型</small></h1>
-<p class="sub">调整 r、ROE、留存率 b，观察 PE 的变化</p>
+<h1>PE 敏感性模拟器</h1>
+<p class="subtitle">调整 r、ROE、留存率 b，观察 PE 如何变化</p>
 
-<div class="fr">
-  PE = (1 &minus; b) / (r &minus; g) &nbsp;&nbsp;其中&nbsp;&nbsp; <em>g = b &times; ROE</em>
+<div class="formula-card">
+  PE = (1 <span class="sep">&minus;</span> b) / ( r <span class="sep">&minus;</span> g ) &nbsp;&nbsp;&nbsp; g = b &times; ROE
 </div>
 
-<div class="sl">
-  <div class="slr">
-    <label>r（股权成本）<em id="rl">10.0%</em></label>
-    <input type="range" id="rs" min="6" max="16" value="10" step="0.5">
-    <span class="rv" id="rr">10.0%</span>
+<div class="control-grid-3">
+  <div class="control-group">
+    <label>r（股权成本） <span id="rVal">10.0%</span></label>
+    <input type="range" id="rSlider" min="6" max="16" value="10" step="0.5">
+    <div class="range-labels"><span>6%</span><span>16%</span></div>
   </div>
-  <div class="slr">
-    <label>ROE<em id="roel">15.0%</em></label>
-    <input type="range" id="roes" min="3" max="30" value="15" step="0.5">
-    <span class="rv" id="roer">15.0%</span>
+  <div class="control-group">
+    <label>ROE（净资产收益率） <span id="roeVal">15.0%</span></label>
+    <input type="range" id="roeSlider" min="3" max="30" value="15" step="0.5">
+    <div class="range-labels"><span>3%</span><span>30%</span></div>
   </div>
-  <div class="slr">
-    <label>b（留存率）<em id="bl">50%</em></label>
-    <input type="range" id="bs" min="0" max="100" value="50" step="2">
-    <span class="rv" id="br">50%</span>
+  <div class="control-group">
+    <label>b（利润留存率） <span id="bVal">50%</span></label>
+    <input type="range" id="bSlider" min="0" max="100" value="50" step="2">
+    <div class="range-labels"><span>全分红</span><span>全留存</span></div>
   </div>
 </div>
 
-<div class="hr">
-  <div class="pe" id="pev">20.0x</div>
-  <div class="pl">PE = (1 &minus; b) / (r &minus; g)</div>
-  <div id="stb" class="st st-g">ROE > r，多留存创造价值</div>
+<div class="pe-hero">
+  <div class="label">市盈率（PE）</div>
+  <div class="value" id="peDisplay">20.0x</div>
+  <div class="desc" id="peStatus">价值创造 — 多留存推高估值</div>
 </div>
 
-<div class="ch">
-  <canvas id="cv" width="880" height="150"></canvas>
+<div class="status-bar">
+  <span class="status-badge badge-green" id="statusBadge">价值创造</span>
+  <span class="status-desc" id="statusDesc">ROE &gt; r，留存再多也值得</span>
 </div>
 
-<p class="fn">曲线展示不同留存率 b 下的 PE 值。红点标记当前参数位置。</p>
+<div class="metric-row">
+  <div class="metric-card">
+    <div class="label">增长率 g</div>
+    <div class="value" id="gMetric">7.5%</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">r &minus; g</div>
+    <div class="value" id="spreadMetric">2.5%</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">b=0% 时 PE</div>
+    <div class="value" id="peZeroMetric">10.0x</div>
+  </div>
+  <div class="metric-card">
+    <div class="label">b=90% 时 PE</div>
+    <div class="value" id="pe90Metric">3.3x</div>
+  </div>
+</div>
+
+<div class="chart-box">
+  <canvas id="cvs" width="880" height="150"></canvas>
+</div>
+
+<p class="footnote">曲线展示不同留存率 b 对应的 PE 值。红点标记当前参数位置。向上倾斜 = 多留存好（ROE &gt; r），向下倾斜 = 多分红好（ROE &lt; r）。</p>
 
 <script>
 (function(){
-  var rs=document.getElementById('rs'), roes=document.getElementById('roes'), bs=document.getElementById('bs');
-  var cv=document.getElementById('cv'), cx=cv.getContext('2d');
-  var W=880, H=150, pad={t:18,r:22,b:22,l:42}, pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  var rS = document.getElementById('rSlider');
+  var roeS = document.getElementById('roeSlider');
+  var bS = document.getElementById('bSlider');
+  var cv = document.getElementById('cvs');
+  var cx = cv.getContext('2d');
+  var W = 880, H = 150;
+  var pad = { t: 18, r: 22, b: 22, l: 42 };
+  var pw = W - pad.l - pad.r;
+  var ph = H - pad.t - pad.b;
 
-  function draw(){
-    var r=parseFloat(rs.value)/100, roe=parseFloat(roes.value)/100, b=parseFloat(bs.value)/100;
-    var g=b*roe, sp=r-g, pe=sp>0.001?(1-b)/sp:null;
+  function fmt(v) { return (v * 100).toFixed(1) + '%'; }
 
-    document.getElementById('rl').textContent=(r*100).toFixed(1)+'%';
-    document.getElementById('rr').textContent=(r*100).toFixed(1)+'%';
-    document.getElementById('roel').textContent=(roe*100).toFixed(1)+'%';
-    document.getElementById('roer').textContent=(roe*100).toFixed(1)+'%';
-    document.getElementById('bl').textContent=(b*100).toFixed(0)+'%';
-    document.getElementById('br').textContent=(b*100).toFixed(0)+'%';
+  function draw() {
+    var r = parseFloat(rS.value) / 100;
+    var roe = parseFloat(roeS.value) / 100;
+    var b = parseFloat(bS.value) / 100;
+    var g = b * roe;
+    var spread = r - g;
+    var pe = spread > 0.001 ? (1 - b) / spread : null;
 
-    var pev=document.getElementById('pev'), stb=document.getElementById('stb');
-    if(pe!==null&&isFinite(pe)&&pe>0&&pe<500){pev.textContent=pe.toFixed(1)+'x';pev.style.color='#2C3E6B'}
-    else if(pe!==null&&pe>=500){pev.textContent='发散';pev.style.color='#e11d48'}
-    else{pev.textContent='N/A';pev.style.color='#94a3b8'}
+    document.getElementById('rVal').textContent = fmt(r);
+    document.getElementById('roeVal').textContent = fmt(roe);
+    document.getElementById('bVal').textContent = (b * 100).toFixed(0) + '%';
+    document.getElementById('gMetric').textContent = fmt(g);
+    document.getElementById('spreadMetric').textContent = fmt(spread);
 
-    if(roe>r+0.002){stb.textContent='ROE > r，多留存创造价值';stb.className='st st-g'}
-    else if(roe<r-0.002){stb.textContent='ROE < r，多分红创造价值';stb.className='st st-r'}
-    else{stb.textContent='ROE ≈ r，留存与分红无差异';stb.className='st st-b'}
+    var peD = document.getElementById('peDisplay');
+    var peStatus = document.getElementById('peStatus');
+    var badge = document.getElementById('statusBadge');
+    var desc = document.getElementById('statusDesc');
 
-    cx.clearRect(0,0,W,H);
-    var maxPE=80, pts=120, xs=[], ys=[];
+    if (pe !== null && isFinite(pe) && pe > 0 && pe < 500) {
+      peD.textContent = pe.toFixed(1) + 'x'; peD.style.color = '#2C3E6B';
+    } else if (pe !== null && pe >= 500) {
+      peD.textContent = '发散'; peD.style.color = '#e11d48';
+    } else {
+      peD.textContent = 'N/A'; peD.style.color = '#94a3b8';
+    }
 
-    for(var i=0;i<=pts;i++){
-      var bi=i/pts; xs.push(pad.l+bi*pw);
-      var spc=r-bi*roe;
-      if(spc>0.003){ys.push(pad.t+ph-Math.min((1-bi)/spc,maxPE)/maxPE*ph)}
-      else{ys.push(null)}
+    var pe0 = r > 0.001 ? (1 / r) : 0;
+    document.getElementById('peZeroMetric').textContent = (pe0 > 0 && pe0 < 500) ? pe0.toFixed(1) + 'x' : '发散';
+    var g90 = 0.9 * roe; var sp90 = r - g90;
+    var pe90c = sp90 > 0.001 ? 0.1 / sp90 : null;
+    document.getElementById('pe90Metric').textContent = (pe90c !== null && pe90c < 500) ? pe90c.toFixed(1) + 'x' : '发散';
+
+    if (roe > r + 0.002) {
+      badge.textContent = '价值创造'; badge.className = 'status-badge badge-green';
+      desc.innerHTML = 'ROE <strong>(' + fmt(roe) + ')</strong> &gt; r <strong>(' + fmt(r) + ')</strong>，留存再多也值得';
+      peStatus.textContent = '价值创造 — 多留存推高估值';
+    } else if (roe < r - 0.002) {
+      badge.textContent = '价值毁损'; badge.className = 'status-badge badge-red';
+      desc.innerHTML = 'ROE <strong>(' + fmt(roe) + ')</strong> &lt; r <strong>(' + fmt(r) + ')</strong>，多分红才是对的';
+      peStatus.textContent = '价值毁损 — 多分红才能提升估值';
+    } else {
+      badge.textContent = '中性'; badge.className = 'status-badge badge-gray';
+      desc.innerHTML = 'ROE <strong>(' + fmt(roe) + ')</strong> &asymp; r <strong>(' + fmt(r) + ')</strong>，留或分无差异';
+      peStatus.textContent = '中性 — 留存与分红对估值影响不大';
+    }
+
+    // ─── Canvas ───
+    cx.clearRect(0, 0, W, H);
+    var maxPE = 80, pts = 120;
+    var xs = [], ys = [];
+
+    for (var i = 0; i <= pts; i++) {
+      var bi = i / pts;
+      xs.push(pad.l + bi * pw);
+      var spc = r - bi * roe;
+      if (spc > 0.003) {
+        ys.push(pad.t + ph - Math.min((1 - bi) / spc, maxPE) / maxPE * ph);
+      } else { ys.push(null); }
     }
 
     // Grid
-    cx.strokeStyle='#f1f5f9';cx.lineWidth=0.5;
-    for(var yv=0;yv<=80;yv+=20){var gy=pad.t+ph-yv/maxPE*ph;cx.beginPath();cx.moveTo(pad.l,gy);cx.lineTo(W-pad.r,gy);cx.stroke()}
-    for(var xv=0;xv<=100;xv+=20){var gx=pad.l+xv/100*pw;cx.beginPath();cx.moveTo(gx,pad.t);cx.lineTo(gx,pad.t+ph);cx.stroke()}
+    cx.strokeStyle = '#f1f5f9'; cx.lineWidth = 0.5;
+    for (var yv = 0; yv <= 80; yv += 20) {
+      var gy = pad.t + ph - yv / maxPE * ph;
+      cx.beginPath(); cx.moveTo(pad.l, gy); cx.lineTo(W - pad.r, gy); cx.stroke();
+    }
+    for (var xv = 0; xv <= 100; xv += 20) {
+      var gx = pad.l + xv / 100 * pw;
+      cx.beginPath(); cx.moveTo(gx, pad.t); cx.lineTo(gx, pad.t + ph); cx.stroke();
+    }
 
     // Labels
-    cx.fillStyle='#94a3b8';cx.font='10px -apple-system,sans-serif';
-    for(var yv=0;yv<=80;yv+=20){var gy=pad.t+ph-yv/maxPE*ph;cx.textAlign='right';cx.fillText(yv+'x',pad.l-6,gy+3)}
-    for(var xv=0;xv<=100;xv+=20){cx.textAlign='center';cx.fillText(xv+'%',pad.l+xv/100*pw,H-5)}
-    cx.fillStyle='#64748b';cx.font='10px -apple-system,sans-serif';cx.textAlign='center';cx.fillText('留存率 b',pad.l+pw/2,H-1)
-    cx.save();cx.translate(12,pad.t+ph/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('PE',0,0);cx.restore()
+    cx.fillStyle = '#94a3b8'; cx.font = '10px -apple-system, sans-serif';
+    for (var yv = 0; yv <= 80; yv += 20) {
+      var gy = pad.t + ph - yv / maxPE * ph;
+      cx.textAlign = 'right'; cx.fillText(yv + 'x', pad.l - 6, gy + 3);
+    }
+    for (var xv = 0; xv <= 100; xv += 20) {
+      cx.textAlign = 'center'; cx.fillText(xv + '%', pad.l + xv / 100 * pw, H - 5);
+    }
+    cx.fillStyle = '#64748b'; cx.font = '10px -apple-system, sans-serif';
+    cx.textAlign = 'center'; cx.fillText('留存率 b', pad.l + pw / 2, H - 1);
+    cx.save(); cx.translate(12, pad.t + ph / 2); cx.rotate(-Math.PI / 2);
+    cx.textAlign = 'center'; cx.fillText('PE', 0, 0); cx.restore();
 
-    // Fill
-    var fv=-1,lv=-1;
-    for(var i=0;i<=pts;i++){if(ys[i]!==null){if(fv<0)fv=i;lv=i}}
-    cx.beginPath();var started=false;
-    for(var i=0;i<=pts;i++){if(ys[i]===null){started=false;continue}if(!started){cx.moveTo(xs[i],ys[i]);started=true}else{cx.lineTo(xs[i],ys[i])}}
-    if(lv>=0){cx.lineTo(xs[lv],pad.t+ph);cx.lineTo(xs[fv],pad.t+ph);cx.closePath()
-      var gd=cx.createLinearGradient(0,pad.t,0,pad.t+ph);gd.addColorStop(0,'rgba(44,62,107,0.1)');gd.addColorStop(1,'rgba(44,62,107,0.01)')
-      cx.fillStyle=gd;cx.fill()}
+    // Gradient fill
+    var fv = -1, lv = -1;
+    for (var i = 0; i <= pts; i++) { if (ys[i] !== null) { if (fv < 0) fv = i; lv = i; } }
+    cx.beginPath(); var started = false;
+    for (var i = 0; i <= pts; i++) {
+      if (ys[i] === null) { started = false; continue; }
+      if (!started) { cx.moveTo(xs[i], ys[i]); started = true; }
+      else { cx.lineTo(xs[i], ys[i]); }
+    }
+    if (lv >= 0) {
+      cx.lineTo(xs[lv], pad.t + ph); cx.lineTo(xs[fv], pad.t + ph); cx.closePath();
+      var grad = cx.createLinearGradient(0, pad.t, 0, pad.t + ph);
+      grad.addColorStop(0, 'rgba(44, 62, 107, 0.1)'); grad.addColorStop(1, 'rgba(44, 62, 107, 0.01)');
+      cx.fillStyle = grad; cx.fill();
+    }
 
     // Curve
-    cx.beginPath();started=false;
-    for(var i=0;i<=pts;i++){if(ys[i]===null){started=false;continue}if(!started){cx.moveTo(xs[i],ys[i]);started=true}else{cx.lineTo(xs[i],ys[i])}}
-    cx.strokeStyle='#2C3E6B';cx.lineWidth=2.5;cx.stroke()
+    cx.beginPath(); started = false;
+    for (var i = 0; i <= pts; i++) {
+      if (ys[i] === null) { started = false; continue; }
+      if (!started) { cx.moveTo(xs[i], ys[i]); started = true; }
+      else { cx.lineTo(xs[i], ys[i]); }
+    }
+    cx.strokeStyle = '#2C3E6B'; cx.lineWidth = 2.5; cx.stroke();
 
-    // Ref line
-    var pz=r>0.003?1/r:0, yz=pad.t+ph-Math.min(pz,maxPE)/maxPE*ph
-    cx.setLineDash([4,4]);cx.strokeStyle='#cbd5e1';cx.lineWidth=0.8
-    cx.beginPath();cx.moveTo(pad.l,yz);cx.lineTo(W-pad.r,yz);cx.stroke();cx.setLineDash([])
-    cx.fillStyle='#94a3b8';cx.font='9px -apple-system,sans-serif';cx.textAlign='right'
-    cx.fillText('b=0 → PE='+(pz<500?pz.toFixed(1)+'x':'发散'),W-pad.r-4,yz-3)
+    // Ref line b=0
+    var pz = r > 0.003 ? 1 / r : 0;
+    var yz = pad.t + ph - Math.min(pz, maxPE) / maxPE * ph;
+    cx.setLineDash([4, 4]); cx.strokeStyle = '#cbd5e1'; cx.lineWidth = 0.8;
+    cx.beginPath(); cx.moveTo(pad.l, yz); cx.lineTo(W - pad.r, yz); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = '#94a3b8'; cx.font = '9px -apple-system, sans-serif'; cx.textAlign = 'right';
+    cx.fillText('b=0 PE=' + (pz < 500 ? pz.toFixed(1) + 'x' : '发散'), W - pad.r - 4, yz - 3);
 
     // Marker
-    var mi=Math.round(b*pts)
-    if(mi>=0&&mi<ys.length&&ys[mi]!==null){
-      var mx=xs[mi],my=ys[mi]
-      cx.beginPath();cx.arc(mx,my,5,0,Math.PI*2);cx.fillStyle='#fff';cx.fill()
-      cx.beginPath();cx.arc(mx,my,3,0,Math.PI*2);cx.fillStyle='#e11d48';cx.fill()
-      var pd=pe!==null&&isFinite(pe)&&pe<500?pe.toFixed(1)+'x':'发散'
-      cx.fillStyle='#1e293b';cx.font='bold 10px -apple-system,sans-serif';cx.textAlign='center'
-      var ly=my-12>pad.t?my-12:my+16
-      cx.fillText('b='+(b*100).toFixed(0)+'%  PE='+pd,mx,ly)
+    var mi = Math.round(b * pts);
+    if (mi >= 0 && mi < ys.length && ys[mi] !== null) {
+      var mx = xs[mi], my = ys[mi];
+      cx.beginPath(); cx.arc(mx, my, 5, 0, Math.PI * 2); cx.fillStyle = '#fff'; cx.fill();
+      cx.beginPath(); cx.arc(mx, my, 3, 0, Math.PI * 2); cx.fillStyle = '#e11d48'; cx.fill();
+      var pd = pe !== null && isFinite(pe) && pe < 500 ? pe.toFixed(1) + 'x' : '发散';
+      cx.fillStyle = '#1e293b'; cx.font = 'bold 10px -apple-system, sans-serif'; cx.textAlign = 'center';
+      var ly = my - 12 > pad.t ? my - 12 : my + 16;
+      cx.fillText('b=' + (b * 100).toFixed(0) + '%  PE=' + pd, mx, ly);
     }
   }
 
-  rs.addEventListener('input',draw);roes.addEventListener('input',draw);bs.addEventListener('input',draw);draw()
+  rS.addEventListener('input', draw);
+  roeS.addEventListener('input', draw);
+  bS.addEventListener('input', draw);
+  draw();
 })();
 </script>
 </body>
